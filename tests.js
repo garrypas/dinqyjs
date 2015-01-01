@@ -250,6 +250,38 @@
 			expect(new Collection(array).element('key')).toBe(99);
 		});
 
+		it("equalTo() -> returns true if all elements are equal", function() {
+			var array = new Collection([1, 2, 3]);
+			var other = [1, 2, 3];
+			expect(array.equalTo(other)).toBe(true);
+		});
+
+		it("equalTo() -> returns false if all elements are not equal", function() {
+			var array = new Collection([1, 2, 3]);
+			var other = [1, 2, 4];
+			expect(array.equalTo(other)).toBe(false);
+		});
+
+		it("equalTo() -> returns false if other is larger", function() {
+			var array = new Collection([1, 2, 3]);
+			var other = [1, 2, 3, 4];
+			expect(array.equalTo(other)).toBe(false);
+		});
+
+		it("equalTo() -> returns false if other is smaller", function() {
+			var array = new Collection([1, 2, 3]);
+			var other = [1, 2];
+			expect(array.equalTo(other)).toBe(false);
+		});
+
+		it("equalTo() -> uses equality comparer", function() {
+			var array = new Collection([1, 2, 3]);
+			var other = [true, 2, 3];
+			expect(array.equalTo(other, function(x, y) {
+				return x == y;
+			})).toBe(true);
+		});
+
 		it("findIndex() -> finds index", function() {
 			expect(list.findIndex(function(element) {
 				return element === 2;

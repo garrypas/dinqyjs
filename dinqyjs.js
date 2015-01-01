@@ -1,5 +1,5 @@
 /*!
- * Dinqyjs JavaScript Library v1.0.1
+ * Dinqyjs JavaScript Library v1.0.2
  * http://dinqyjs.com/
  *
  * Copyright (c) 2014 Garry Passarella
@@ -62,18 +62,13 @@ var Dinqyjs = (function(){
 			var _arrayPrototype = Array.prototype;
 
 			var _firstIndex = function(array, predicate, increments, startIndex, count) {
-				var thisLength = array.length,
-					thisElement;
+				var thisElement,
+					thisLength = array.length;
 				
 				increments = increments || 1;
 
 				if(!_isFunction(predicate)) {
-					if(thisLength > 0) {
-						return increments > 0 ? 0 : thisLength - 1;
-					}
-					else{
-						return -1;
-					}
+					return thisLength > 0 ? (increments > 0 ? 0 : thisLength - 1) : -1;
 				}
 
 				if(_isUndefined(startIndex)) {
@@ -99,12 +94,13 @@ var Dinqyjs = (function(){
 				var thisLength = arr.length,
 					highest = thisLength > 0 ? arr[0] : null,
 					thisElement,
-					i = 0;
+					i = 0,
+					useSelector = _isFunction(selector);
 
 				while(i < thisLength) {
 					thisElement = arr[i];
 
-					if(comparison((typeof selector == 'function' ? selector(thisElement) : thisElement) , highest)) {
+					if(comparison((useSelector ? selector(thisElement) : thisElement) , highest)) {
 						highest = thisElement;
 					}
 					i++;
@@ -164,16 +160,14 @@ var Dinqyjs = (function(){
 
 
 			var _partition = function(array, keySelector, elementSelector, resultSelector) {
-				var thisLength = array.length,
-					i = 0,
+				var i = 0,
 					thisElement,
 					partitions = [],
 					p,
 					useElementSelector = _isFunction(elementSelector),
-					useResultSelector = _isFunction(resultSelector),
-					key;
+					useResultSelector = _isFunction(resultSelector);
 
-				while(i < thisLength) {
+				while(i < array.length) {
 					thisElement = array[i++];
 					p = keySelector(thisElement);
 					if(useElementSelector) {
@@ -202,8 +196,6 @@ var Dinqyjs = (function(){
 
 			var _useResultSelectorOnGroup = function(array, resultSelector) {
 				var key,
-					i = 0,
-					thisLength = array.length,
 					thisElement;
 
 				for(key in array) {
@@ -216,9 +208,9 @@ var Dinqyjs = (function(){
 
 			Collection.prototype = {
 				all : function(predicate) {
-					var all = true;
-					for(var i = 0; i < this._.length; i++) {
-						all &= predicate(this._[i]);
+					var all = true, i = 0;
+					while(i < this._.length) {
+						all &= predicate(this._[i++]);
 					}
 					return all ? true : false;
 				},
@@ -253,8 +245,7 @@ var Dinqyjs = (function(){
 				},
 
 				clearWhere : function(selector) {
-					var thisLength = this._.length,
-						i = thisLength - 1;
+					var i = this._.length - 1;
 
 					while(i >= 0) {
 						if(selector(this._[i])) {
@@ -321,9 +312,8 @@ var Dinqyjs = (function(){
 				},
 
 				doUntil : function(callback, stoppingCondition) {
-					var i = 0,
-						thisLength = this._.length;
-					while(i < thisLength) {
+					var i = 0;
+					while(i < this._.length) {
 						callback(this._[i]);
 						i++;
 						if(stoppingCondition(this._[i])) {
@@ -333,9 +323,8 @@ var Dinqyjs = (function(){
 				},
 
 				doWhile : function(callback, condition) {
-					var i = 0,
-						thisLength = this._.length;
-					while(i < thisLength) {
+					var i = 0;
+					while(i < this._.length) {
 						if(!condition(this._[i], i)) {
 							return;
 						}
@@ -345,9 +334,8 @@ var Dinqyjs = (function(){
 				},
 
 				each : function(callback) {
-					var i = 0,
-						thisLength = this._.length;
-					while(i < thisLength) {
+					var i = 0;
+					while(i < this._.length) {
 						callback(this._[i], i);
 						i++;
 					}
@@ -357,18 +345,32 @@ var Dinqyjs = (function(){
 					return this._[index];
 				},
 
-				findIndex : function (predicate, startIndex, count) {
-					if(!_isFunction(predicate)) {
-						return -1;
+				equalTo : function(other, predicate) {
+					other = _unwrap(other);
+					var i = this._.length - 1,
+						useFunction = _isFunction(predicate),
+						thisElement,
+						otherElement;
+
+					if(this._.length != other.length) {
+						return false;
 					}
-					return _firstIndex(this._, predicate, 1, startIndex, count);
+					while(i >= 0) {
+						thisElement = this._[i];
+						otherElement = other[i--];
+						if(useFunction ? !predicate(thisElement, otherElement) : thisElement !== otherElement) {
+							return false;
+						}
+					}
+					return true;
+				},
+
+				findIndex : function (predicate, startIndex, count) {
+					return _isFunction(predicate) ? _firstIndex(this._, predicate, 1, startIndex, count) : -1;
 				},
 
 				findLastIndex : function (predicate, startIndex, count) {
-					if(!_isFunction(predicate)) {
-						return -1;
-					}
-					return _firstIndex(this._, predicate, -1, startIndex, count);
+					return _isFunction(predicate) ? _firstIndex(this._, predicate, -1, startIndex, count) : -1;
 				},
 
 				first : function (predicate) {
@@ -384,9 +386,8 @@ var Dinqyjs = (function(){
 				flatten : function() {
 					var i = 0,
 						flattened = new Collection(),
-						thisLength = this._.length,
 						thisElement;
-					while(i < thisLength) {
+					while(i < this._.length) {
 						thisElement = this._[i++];
 						Collection.prototype.push.apply(flattened, Array.isArray(thisElement) ? thisElement : [thisElement]);
 					}
@@ -425,22 +426,18 @@ var Dinqyjs = (function(){
 						i = 0,
 						j,
 						thisDistinct = this.distinct(predicate).raw(),
-						otherDistinct = _wrap(other).distinct(predicate).raw(),
-						thisLength = thisDistinct.length,
-						otherLength = otherDistinct.length;
+						otherDistinct = _wrap(other).distinct(predicate).raw();
 
-					while(i < thisLength) {
-						x = thisDistinct[i];
+					while(i < thisDistinct.length) {
+						x = thisDistinct[i++];
 						j = 0;
-						while(j < otherLength) {
-							y = otherDistinct[j];
+						while(j < otherDistinct.length) {
+							y = otherDistinct[j++];
 							if(usePredicate && predicate(x, y) || !usePredicate && x === y) {
 								intersection.push(x);
 								break;
 							}
-							j++;
 						}
-						i++;
 					}
 					return new Collection(intersection);
 				},
@@ -448,7 +445,7 @@ var Dinqyjs = (function(){
 				innerJoin : function(other, predicate, joinedObjectCreator) {
 					other = _unwrap(other);
 					if(!Array.isArray(other)) {
-						return new Collection(this._.concat());
+						return this.clone();
 					}
 					if(!_isFunction(joinedObjectCreator)) {
 						joinedObjectCreator = _joinXY;
@@ -458,21 +455,17 @@ var Dinqyjs = (function(){
 						innerElement,
 						outerElement,
 						i = 0,
-						j,
-						thisLength = this._.length,
-						otherLength = other.length;
+						j;
 
-					while(i < thisLength) {
-						innerElement = this._[i];
+					while(i < this._.length) {
+						innerElement = this._[i++];
 						j = 0;
-						while(j < otherLength) {
-							outerElement = other[j];
+						while(j < other.length) {
+							outerElement = other[j++];
 							if(predicate(innerElement, outerElement)) {
 								joined.push(joinedObjectCreator(innerElement, outerElement));
 							}
-							j++;
 						}
-						i++;
 					}
 					return new Collection(joined);
 				},
@@ -536,16 +529,14 @@ var Dinqyjs = (function(){
 						outerElement,
 						outerFound,
 						i = 0,
-						thisLength = this._.length,
 						j,
-						otherLength = other.length,
 						usePredicate = _isFunction(predicate);
 
-					while(i < thisLength) {
+					while(i < this._.length) {
 						innerElement = this._[i++];
 						outerFound = 0;
 						j = 0;
-						while(j < otherLength) {
+						while(j < other.length) {
 							outerElement = other[j++];
 							if(usePredicate && predicate(innerElement, outerElement) || !usePredicate && innerElement === outerElement) {
 								outerFound = 1;
@@ -611,13 +602,12 @@ var Dinqyjs = (function(){
 
 				//Use Fisher-Yates shuffle algorithm
 				shuffle : function() {
-					var thisLength = this._.length,
-						i = thisLength - 1,
+					var i = this._.length - 1,
 						thisElement,
 						random;
 
 					while(i >= 0) {
-       					random = Math.floor(Math.random() * thisLength);
+       					random = Math.floor(Math.random() * this._.length);
        					thisElement = this._[i];
        					this._[i--] = this._[random];
        					this._[random] = thisElement;
@@ -680,15 +670,13 @@ var Dinqyjs = (function(){
 				where : function(predicate) {
 					var matches = [],
 						thisElement,
-						i = 0,
-						thisLength = this._.length;
+						i = 0;
 
-					while(i < thisLength) {
-						thisElement = this._[i];
+					while(i < this._.length) {
+						thisElement = this._[i++];
 						if(predicate(thisElement)) {
 							matches.push(thisElement);
 						}
-						i++;
 					}
 					return new Collection(matches);
 				}
@@ -714,7 +702,7 @@ var Dinqyjs = (function(){
 						i = 0;
 
 					if(!_isFunction(callback)) {
-						return void(0);
+						return void 0;
 					}
 
 					while(i < thisLength) {
@@ -726,7 +714,7 @@ var Dinqyjs = (function(){
 
 			if (!Array.isArray) {
 				Array.isArray = function(arg) {
-					return Object.prototype.toString.call(arg) === '[object Array]';
+					return Object.prototype.toString.call(arg) == '[object Array]';
 				};
 			}
 
