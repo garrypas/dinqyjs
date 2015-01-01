@@ -1,4 +1,4 @@
-dinqyjs
+dinqyjs (for the latest documentation go to dinqyjs.com)
 =======
 
 First wrap your array in an instance of Dinqyjs.Collection
@@ -150,6 +150,10 @@ findIndex(predicate[, start, count])
 
 Finds the first element in the collection that matches the predicate, and returns its index position. Optionally supply a start position and how many iterations to perform before terminating.
 
+equalTo(other [, predicate])
+Compares the elements of two collections for equality. If all elements are equal and the collections are the same size then 'true' is returned, otherwise 'false' is returned. If a predicate is not supplied a default '===' is used to test for equality
+var element = collection.element(1);
+
 var index = collection.findIndex(function(element) {
     return element === 2;
 }, 1, 3);
@@ -157,7 +161,7 @@ The example above would find 2 in [1, 2, 3, 4, 5] but not 1 or 5 as it would nev
 
 findLastIndex(predicate[, start, count])
 
-Finds the last element in the collection (looping backwards) that matches the predicate, and returns its index position. Optionally supply a start position and how many iterations to perform before terminating.
+Finds the last element in the collection (looping backwards) that matches the predicate, and returns its index position. Optionally supply a start position and how many iterations to perform before terminating
 
 var index = collection.findLastIndex(function(element) {
     return element === 2;
@@ -179,6 +183,22 @@ Takes and array of arrays and creates a flat array containing all the elements.
 var nonFlat = [ [1,2,3], 4, [5,6], 7, 8, [9, 10] ];
 var flat = new Collection(nonFlat).flatten();
 In the example above flat would be an array of 10 elements [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+groupBy(keySelector[, elementSelector, resultSelector])
+
+Splits an collection into sections. The value returned by the key selector indicates the section the element should be partitioned into. A key and result selector can be specified to customize the resultset. The key difference between partition() and groupBy() is that partition does not modify the underlying array and can be seen more as a way of getting a window into the data whereas groupBy() transforms the underlying array.
+
+var collection = new Dinqyjs.Collection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+var grouped = collection.groupBy(function(e) {
+                                     return e.key
+                                 },
+                                 function(e) {
+                                     return { firstName : e.firstName, lastName : e.lastName };
+                                 },
+                                 function(group, key) {
+                                     group.key = key;
+                                     return group;
+                                 });
 
 indexOf(element[, start, count])
 
@@ -343,9 +363,9 @@ Fixes 'holey' arrays by removing null and undefined elements. This function modi
 collection.pack();
 If collection had been [null, 1, 2, undefined, 3] the collection would then become [1, 2, 3] once this code has run
 
-partition(callback)
+partition(keySelector[, elementSelector, resultSelector])
 
-Splits an collection into sections. The value returned by the predicate indicates the section the element should be partitioned into.
+Splits an collection into sections. The value returned by the key selector indicates the section the element should be partitioned into. A key and result selector can be specified to customize the resultset. The key difference between partition() and groupBy() is that partition does not modify the underlying array and can be seen more as a way of getting a window into the data whereas groupBy() transforms the underlying array.
 
 var collection = new Dinqyjs.Collection([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 var partitioned = collection.partition(function(e) {
