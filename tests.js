@@ -346,6 +346,71 @@
 			expect(new Collection(nonFlat).flatten().raw()).toEqual(list.raw());
 		});
 
+		it("groupBy() -> groups", function() {
+			var predicate = function(e) {
+				return (e - 1) % 3;
+			};
+			var grouped = list.groupBy(predicate);
+			expect(grouped.element(0)).toEqual([1, 4, 7, 10]);
+			expect(grouped.element(1)).toEqual([2, 5, 8]);
+			expect(grouped.element(2)).toEqual([3, 6, 9]);
+		});
+
+		it("groupBy() -> groups boolean", function() {
+			var predicate = function(e) {
+				return e % 2 ? true : false;
+			};
+			var grouped = list.groupBy(predicate);
+			expect(grouped.element(true)).toEqual([1, 3, 5, 7, 9]);
+			expect(grouped.element(false)).toEqual([2, 4, 6, 8, 10]);
+		});
+
+		it("groupBy() -> groups correct length", function() {
+			var predicate = function(e) {
+				return e % 3;
+			};
+			var grouped = list.groupBy(predicate);
+			expect(grouped.count()).toBe(3);
+		});
+
+		it("groupBy() -> groups uses element selector", function() {
+			var predicate = function(e) {
+				return e % 2 ? true : false;
+			};
+			var elementSelector = function(e) {
+				return e * 2;
+			};
+			var grouped = list.groupBy(predicate, elementSelector);
+			expect(grouped.element(true)).toEqual([2, 6, 10, 14, 18]);
+			expect(grouped.element(false)).toEqual([4, 8, 12, 16, 20]);
+		});
+
+		it("groupBy() -> groups uses result selector", function() {
+			var predicate = function(e) {
+				return e % 2 ? true : false;
+			};
+			var resultSelector = function(e, key) {
+				e.key = key;
+				for(var i = 0; i < e.length; i++) {
+					e[i] *= 2;
+				}
+				return e;
+			};
+			var grouped = list.groupBy(predicate, null, resultSelector);
+			expect(grouped.element(true)).toEqual([2, 6, 10, 14, 18]);
+			expect(grouped.element(false)).toEqual([4, 8, 12, 16, 20]);
+			expect(grouped.element(true).key).toEqual('true');
+			expect(grouped.element(false).key).toEqual('false');
+		});
+
+		it("groupBy() -> modifies original", function() {
+			var predicate = function(e) {
+				return e % 2 ? true : false;
+			};
+			var grouped = list.groupBy(predicate);
+			expect(grouped.raw()).toEqual(list.raw());
+		});
+
 		it("indexOf() -> returns the index of an element", function() {
 			expect(list.indexOf(2)).toBe(1);
 		});
@@ -738,6 +803,45 @@
 			};
 			var partitioned = list.partition(predicate);
 			expect(partitioned.count()).toBe(3);
+		});
+
+		it("partition() -> partitions uses element selector", function() {
+			var predicate = function(e) {
+				return e % 2 ? true : false;
+			};
+			var elementSelector = function(e) {
+				return e * 2;
+			};
+			var partitioned = list.partition(predicate, elementSelector);
+			expect(partitioned.element(true)).toEqual([2, 6, 10, 14, 18]);
+			expect(partitioned.element(false)).toEqual([4, 8, 12, 16, 20]);
+		});
+
+		it("partition() -> partitions uses result selector", function() {
+			var predicate = function(e) {
+				return e % 2 ? true : false;
+			};
+			var resultSelector = function(e, key) {
+				e.key = key;
+				for(var i = 0; i < e.length; i++) {
+					e[i] *= 2;
+				}
+				return e;
+			};
+			var partitioned = list.partition(predicate, null, resultSelector);
+			expect(partitioned.element(true)).toEqual([2, 6, 10, 14, 18]);
+			expect(partitioned.element(false)).toEqual([4, 8, 12, 16, 20]);
+			expect(partitioned.element(true).key).toEqual('true');
+			expect(partitioned.element(false).key).toEqual('false');
+		});
+
+		it("partition() -> creates a copy", function() {
+			var predicate = function(e) {
+				return e % 2 ? true : false;
+			};
+			var partitioned = list.partition(predicate);
+			expect(partitioned.raw()).not.toEqual(list.raw());
+			expect(list.raw()).toEqual([1,2,3,4,5,6,7,8,9,10]);
 		});
 
 		it("push() -> pushes range when a list of elements", function() {

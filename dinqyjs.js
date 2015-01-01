@@ -1,3 +1,13 @@
+/*!
+ * Dinqyjs JavaScript Library v1.0.0
+ * http://dinqyjs.com/
+ *
+ * Copyright (c) 2014 Garry Passarella
+ * Released under the MIT license
+ * http://dinqyjs.com/license
+ *
+ * Date: 2014-12-31
+ */
 var Dinqyjs = (function(){
 	return {
 		Collection : (function(){
@@ -151,6 +161,34 @@ var Dinqyjs = (function(){
 				return _config[key] = (arguments.length < 2) ? _config[key] : value;
 			};
 
+
+			var _partition = function(array, keySelector, elementSelector, resultSelector) {
+				var thisLength = array.length,
+					i = 0,
+					thisElement,
+					partitions = [],
+					p,
+					useElementSelector = _isFunction(elementSelector),
+					useResultSelector = _isFunction(resultSelector),
+					key;
+
+				while(i < thisLength) {
+					thisElement = array[i++];
+					p = keySelector(thisElement);
+					if(useElementSelector) {
+						thisElement = elementSelector(thisElement);
+					}
+
+					(partitions[p] = (p in partitions) ? partitions[p] : []).push(thisElement);
+				}
+
+				if(useResultSelector) {
+					_useResultSelectorOnGroup(partitions, resultSelector);
+				}
+
+				return partitions;
+			};
+
 			var _sortArg = function(selector) {
 				var useSelector = _isFunction(selector);
 				if(useSelector) {
@@ -159,6 +197,20 @@ var Dinqyjs = (function(){
 					}];
 				}
 				return [];
+			};
+
+			var _useResultSelectorOnGroup = function(array, resultSelector) {
+				var key,
+					i = 0,
+					thisLength = array.length,
+					thisElement;
+
+				for(key in array) {
+					thisElement = array[key];
+					array[key] = resultSelector(thisElement, key);
+				}
+			
+				return array;
 			};
 
 			Collection.prototype = {
@@ -340,6 +392,16 @@ var Dinqyjs = (function(){
 					return flattened;
 				},
 
+				groupBy : function(keySelector, elementSelector, resultSelector) {
+					var partition = _partition(this._, keySelector, elementSelector, resultSelector);
+					this._.splice(0, this._.length);
+					for(var key in partition) {
+						this._[key] = partition[key];
+					}
+					delete partition;
+					return this;
+				},
+
 				indexOf : function() {
 					return _arrayPrototype.indexOf.apply(this._, arguments);
 				},
@@ -350,9 +412,9 @@ var Dinqyjs = (function(){
 
 				insertRange : function(index, elements) {
 					var args = [index, 0].concat(
-						arguments.length < 3 ? _unwrap(elements) : Array.prototype.slice.call(arguments, 1)
+						arguments.length < 3 ? _unwrap(elements) : _arrayPrototype.slice.call(arguments, 1)
 					);
-					Array.prototype.splice.apply(this._, args);
+					_arrayPrototype.splice.apply(this._, args);
 				},
 
 				intersect : function(other, predicate) {
@@ -511,20 +573,8 @@ var Dinqyjs = (function(){
 					return this;
 				},
 
-				partition : function(predicate) {
-					var thisLength = this._.length,
-						i = 0,
-						thisElement,
-						partitions = [],
-						p;
-
-					while(i < thisLength) {
-						thisElement = this._[i++];
-						p = predicate(thisElement);
-						(partitions[p] = (p in partitions) ? partitions[p] : []).push(thisElement);
-					}
-
-					return new Collection(partitions);
+				partition : function(keySelector, elementSelector, resultSelector) {
+					return new Collection(_partition(this._, keySelector, elementSelector, resultSelector));
 				},
 
 				pop : function() {
