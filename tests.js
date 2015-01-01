@@ -17,6 +17,15 @@
 		};
 	};
 
+	var elementsMatch = function(collection1, collection2) {
+		var match = true;
+		collection1.each(function(e, index) {
+			match &= collection2.element(index) === e;
+		});
+		match &= collection1.count() === collection2.count();
+		return (match ? true : false);
+	};
+
 	describe("Lambdascript tests", function() {
 		var list;
 		beforeEach(function() {
@@ -397,8 +406,8 @@
 				return e;
 			};
 			var grouped = list.groupBy(predicate, null, resultSelector);
-			expect(grouped.element(true)).toEqual([2, 6, 10, 14, 18]);
-			expect(grouped.element(false)).toEqual([4, 8, 12, 16, 20]);
+			expect(elementsMatch(new Collection(grouped.element(true)), new Collection([2, 6, 10, 14, 18]))).toBe(true);
+			expect(elementsMatch(new Collection(grouped.element(false)), new Collection([4, 8, 12, 16, 20]))).toBe(true);
 			expect(grouped.element(true).key).toEqual('true');
 			expect(grouped.element(false).key).toEqual('false');
 		});
@@ -828,9 +837,11 @@
 				}
 				return e;
 			};
-			var partitioned = list.partition(predicate, null, resultSelector);
-			expect(partitioned.element(true)).toEqual([2, 6, 10, 14, 18]);
-			expect(partitioned.element(false)).toEqual([4, 8, 12, 16, 20]);
+
+
+			var partitioned = list.groupBy(predicate, null, resultSelector);
+			expect(elementsMatch(new Collection(partitioned.element(true)), new Collection([2, 6, 10, 14, 18]))).toBe(true);
+			expect(elementsMatch(new Collection(partitioned.element(false)), new Collection([4, 8, 12, 16, 20]))).toBe(true);
 			expect(partitioned.element(true).key).toEqual('true');
 			expect(partitioned.element(false).key).toEqual('false');
 		});

@@ -11,6 +11,7 @@
 var Dinqyjs = (function(){
 	return {
 		Collection : (function(){
+			'use strict';
 		    function Collection(array){
 		    	this._ = array || [];
 		    }
@@ -398,7 +399,6 @@ var Dinqyjs = (function(){
 					for(var key in partition) {
 						this._[key] = partition[key];
 					}
-					delete partition;
 					return this;
 				},
 
