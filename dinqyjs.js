@@ -1,5 +1,5 @@
 /*!
- * Dinqyjs JavaScript Library v1.0.0
+ * Dinqyjs JavaScript Library v1.0.1
  * http://dinqyjs.com/
  *
  * Copyright (c) 2014 Garry Passarella
