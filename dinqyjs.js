@@ -20,6 +20,10 @@ var Dinqyjs = (function(){
 				ARRAY_PREALLOCATION : 64000
 			},
 
+			NULL = null,
+			TRUE = true,
+			FALSE = false,
+
 			_differenceXY = function(inner, outer, predicate) {
 				var usePredicate = _isFunction(predicate),
 					i = 0,
@@ -100,7 +104,7 @@ var Dinqyjs = (function(){
 
 			_getTop1 = function(comparison, arr, selector) {
 				var thisLength = arr.length,
-					extreme = thisLength > 0 ? arr[0] : null,
+					extreme = thisLength > 0 ? arr[0] : NULL,
 					thisElement,
 					i = 0,
 					useSelector = _isFunction(selector),
@@ -140,7 +144,7 @@ var Dinqyjs = (function(){
 			},
 
 			_total = function(array, summingFunction, selector) {
-				var total = null,
+				var total = NULL,
 					i = array.length - 1,
 					thisElement,
 					usePredicate = _isFunction(selector),
@@ -149,7 +153,7 @@ var Dinqyjs = (function(){
 				while(i >= 0) {
 					thisElement = array[i--];
 					toAdd = usePredicate ? selector(thisElement) : thisElement;
-					total = (total === null ? toAdd : summingFunction(total, toAdd));
+					total = (total === NULL ? toAdd : summingFunction(total, toAdd));
 				}
 				return total;
 			},
@@ -202,7 +206,7 @@ var Dinqyjs = (function(){
 				 		return +object.length === 0;
 				 	}
 				}
-				return false;
+				return FALSE;
 			};
 
 			Collection.configure = function(key, value) {
@@ -211,11 +215,11 @@ var Dinqyjs = (function(){
 
 			Collection.prototype = {
 				all : function(predicate) {
-					var all = true, i = 0;
+					var all = TRUE, i = 0;
 					while(i < this._.length) {
 						all &= predicate(this._[i++]);
 					}
-					return all ? true : false;
+					return all ? TRUE : FALSE;
 				},
 
 				any : function(predicate) {
@@ -361,16 +365,16 @@ var Dinqyjs = (function(){
 						otherElement;
 
 					if(thisLength != other.length) {
-						return false;
+						return FALSE;
 					}
 					while(i >= 0) {
 						thisElement = this._[i];
 						otherElement = other[i--];
 						if(useFunction ? !predicate(thisElement, otherElement) : thisElement !== otherElement) {
-							return false;
+							return FALSE;
 						}
 					}
-					return true;
+					return TRUE;
 				},
 
 				findIndex : function (predicate, startIndex, count) {
@@ -532,7 +536,7 @@ var Dinqyjs = (function(){
 				outerJoin : function(other, predicate, joinedObjectCreator) {
 					other = _unwrap(other);
 					if(!Array.isArray(other)) {
-						return _wrap(this._.concat());
+						return this.clone();
 					}
 					if(!_isFunction(joinedObjectCreator)) {
 						joinedObjectCreator = _joinXY;
@@ -559,7 +563,7 @@ var Dinqyjs = (function(){
 						}
 
 						if(!outerFound) {
-							joined.push(joinedObjectCreator(innerElement, null));
+							joined.push(joinedObjectCreator(innerElement, NULL));
 						}
 					}
 					return _wrap(joined);
@@ -570,7 +574,7 @@ var Dinqyjs = (function(){
 						thisElement;
 					while(i >= 0) {
 						thisElement = this._[i];
-						if(_isUndefined(thisElement) || thisElement === null) {
+						if(_isUndefined(thisElement) || thisElement === NULL) {
 							this._.splice(i, 1);
 						}
 						i--;
