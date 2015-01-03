@@ -1,5 +1,5 @@
 /*!
- * Dinqyjs JavaScript Library v1.1.2
+ * Dinqyjs JavaScript Library v1.2.0
  * http://dinqyjs.com/
  *
  * Copyright (c) 2014 Garry Passarella
@@ -50,7 +50,7 @@ var Dinqyjs = (function(){
 						difference.push(x);
 					}
 				}
-				return new Collection(difference);
+				return _wrap(difference);
 			},
 
 			_eachKeys = function(array, callback) {
@@ -264,11 +264,11 @@ var Dinqyjs = (function(){
 				},
 
 				clone : function() {
-					return new Collection(this._.concat());
+					return _wrap(this._.concat());
 				},
 
 				concat : function() {
-					return new Collection(_arrayPrototype.concat.apply(this._, arguments));
+					return _wrap(_arrayPrototype.concat.apply(this._, arguments));
 				},
 
 				contains : function(item) {
@@ -315,7 +315,7 @@ var Dinqyjs = (function(){
 							}
 						}
 					}
-					return new Collection(distinct);
+					return _wrap(distinct);
 				},
 
 				doUntil : function(callback, stoppingCondition) {
@@ -352,8 +352,8 @@ var Dinqyjs = (function(){
 					}
 				},
 
-				element : function(index) {
-					return this._[index];
+				element : function(index, item) {
+					return this._[index] = arguments.length > 1 ? item : this._[index];
 				},
 
 				equalTo : function(other, predicate) {
@@ -450,7 +450,7 @@ var Dinqyjs = (function(){
 							}
 						}
 					}
-					return new Collection(intersection);
+					return _wrap(intersection);
 				},
 
 				innerJoin : function(other, predicate, joinedObjectCreator) {
@@ -478,7 +478,7 @@ var Dinqyjs = (function(){
 							}
 						}
 					}
-					return new Collection(joined);
+					return _wrap(joined);
 				},
 
 				join : function() {
@@ -510,7 +510,7 @@ var Dinqyjs = (function(){
 
 				map : function() {
 					var mapped = _arrayPrototype.map.apply(this._, arguments);
-					return mapped ? new Collection(mapped) : void 0;
+					return mapped ? _wrap(mapped) : void 0;
 				},
 
 				max : function(selector) {
@@ -530,7 +530,7 @@ var Dinqyjs = (function(){
 				outerJoin : function(other, predicate, joinedObjectCreator) {
 					other = _unwrap(other);
 					if(!Array.isArray(other)) {
-						return new Collection(this._.concat());
+						return _wrap(this._.concat());
 					}
 					if(!_isFunction(joinedObjectCreator)) {
 						joinedObjectCreator = _joinXY;
@@ -560,7 +560,7 @@ var Dinqyjs = (function(){
 							joined.push(joinedObjectCreator(innerElement, null));
 						}
 					}
-					return new Collection(joined);
+					return _wrap(joined);
 				},
 
 				pack : function() {
@@ -577,7 +577,7 @@ var Dinqyjs = (function(){
 				},
 
 				partition : function(keySelector, elementSelector, resultSelector) {
-					return new Collection(_partition(this._, keySelector, elementSelector, resultSelector));
+					return _wrap(_partition(this._, keySelector, elementSelector, resultSelector));
 				},
 
 				pop : function() {
@@ -588,8 +588,8 @@ var Dinqyjs = (function(){
 					return _arrayPrototype.push.apply(this._, arguments);
 				},
 
-				range : function(start, end) {
-					return this._.slice(start, end);
+				range : function(startBefore, endBefore) {
+					return _wrap(this._.slice(startBefore, endBefore));
 				},
 
 				raw : function() {
@@ -605,7 +605,7 @@ var Dinqyjs = (function(){
 				},
 
 				reverse : function() {
-					return new Collection(_arrayPrototype.reverse.apply(this._, arguments));
+					return _wrap(_arrayPrototype.reverse.apply(this._, arguments));
 				},
 
 				shift : function() {
@@ -640,7 +640,7 @@ var Dinqyjs = (function(){
 				},
 
 				skip : function(count) {
-					return new Collection(this._.slice(count));
+					return _wrap(this._.slice(count));
 				},
 
 				sort : function() {
@@ -655,7 +655,7 @@ var Dinqyjs = (function(){
 				},
 
 				take : function(count) {
-					return new Collection(this._.slice(0, count));
+					return _wrap(this._.slice(0, count));
 				},
 
 				toString : function() {
@@ -687,7 +687,7 @@ var Dinqyjs = (function(){
 							matches.push(thisElement);
 						}
 					}
-					return new Collection(matches);
+					return _wrap(matches);
 				}
 			};
 

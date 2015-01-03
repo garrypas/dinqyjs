@@ -303,6 +303,15 @@
 			expect(new Collection(array).element('key')).toBe(99);
 		});
 
+		it("element() -> sets element", function() {
+			list.element(1, 99);
+			expect(list.element(1)).toBe(99);
+		});
+
+		it("element() -> returns newly set element", function() {
+			expect(new Collection([1,2,3]).element(1, 99)).toBe(99);
+		});
+
 		it("equalTo() -> returns true if all elements are equal", function() {
 			var array = new Collection([1, 2, 3]);
 			var other = [1, 2, 3];
@@ -952,6 +961,11 @@
 			expect(list.count()).toBe(12);
 			expect(list.raw()[10]).toBe(11);
 			expect(list.raw()[11]).toBe(12);
+		});
+
+		it("range() -> gets range", function() {
+			var range = list.range(1,3);
+			expect(range.raw()).toEqual([2,3]);
 		});
 
 		it("removeAt() -> removes at element", function() {
