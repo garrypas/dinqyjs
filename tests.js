@@ -755,18 +755,6 @@
 			})).toBe(10);
 		});
 
-		it("median() -> gets the middle value (even number of elements)", function() {
-			expect(list.median()).toBe(5);
-		});
-
-		it("median() -> gets the middle value (odd number of elements)", function() {
-			expect(new Collection([1]).median()).toBe(1);
-		});
-
-		it("median() -> gets undefined when no elements", function() {
-			expect(new Collection().median()).toBe(void 0);
-		});
-
 		it("min() -> returns the minimum value", function() {
 			expect(list.min()).toBe(1);
 		});

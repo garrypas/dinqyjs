@@ -54,9 +54,8 @@ var Dinqyjs = (function(){
 			},
 
 			_eachKeys = function(array, callback) {
-				var thisElement,
-					key;
-				for(key in array) {
+				var thisElement;
+				for(var key in array) {
 					thisElement = array[key];
 					if(!_isFunction(thisElement)) {
 						callback(thisElement, key);
@@ -181,7 +180,12 @@ var Dinqyjs = (function(){
 
 			_sortArg = function(selector) {
 				var useSelector = _isFunction(selector);
-				return useSelector ? [function(a, b) { return selector(a) - selector(b); }] : [];
+				if(useSelector) {
+					return [function(a, b) {
+						return selector(a) - selector(b);
+					}];
+				}
+				return [];
 			},
 
 			_useResultSelectorOnGroup = function(array, resultSelector) {
@@ -196,6 +200,10 @@ var Dinqyjs = (function(){
 				return array;
 			};
 
+			Collection.configure = function(key, value) {
+				return _config[key] = (arguments.length < 2) ? _config[key] : value;
+			};
+
 			Collection.associative = function(object) {
 				for(var i in object) {
 					if(!_isFunction(object[i])) {
@@ -203,10 +211,6 @@ var Dinqyjs = (function(){
 				 	}
 				}
 				return false;
-			};
-
-			Collection.configure = function(key, value) {
-				return _config[key] = (arguments.length < 2) ? _config[key] : value;
 			};
 
 			Collection.prototype = {
@@ -511,12 +515,6 @@ var Dinqyjs = (function(){
 
 				max : function(selector) {
 					return _getTop1(0, this._, selector);
-				},
-
-				median : function() {
-					var thisLength = this._.length,
-						index = parseInt((thisLength / 2) - 0.5);
-					return index >= thisLength ? void 0 : this._[index];
 				},
 
 				min : function(selector) {
