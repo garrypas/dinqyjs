@@ -73,6 +73,31 @@
 			expect(thisList.raw()).toEqual([1,2,3]);
 		});
 
+		it('associative() -> true if associative array', function() {
+			var associativeArray = [];
+			associativeArray["a"] = 1;
+			var isAssociative = Collection.associative(associativeArray);
+			expect(isAssociative).toBe(true);
+		});
+
+		it('associative() -> false if proper array (empty)', function() {
+			var array = [];
+			var isAssociative = Collection.associative(array);
+			expect(isAssociative).toBe(false);
+		});
+
+		it('associative() -> false if proper array (filled)', function() {
+			var array = [1];
+			var isAssociative = Collection.associative(array);
+			expect(isAssociative).toBe(false);
+		});
+
+		it('associative() -> false if object', function() {
+			var array = [1];
+			var isAssociative = Collection.associative({});
+			expect(isAssociative).toBe(false);
+		});
+
 		it("atRandom() -> chooses an element at random", function() {
 			expect(typeof list.atRandom()).toBe('number');
 		});
@@ -222,13 +247,41 @@
 			expect(elements).toEqual([1,2,3,4,5]);
 		});
 
-
-		it("each() -> to enumerate all", function() {
+		it("each() -> enumerates", function() {
 			var elements = [];
 			list.each(function(element) {
 				elements.push(element);
 			});
 			expect(elements).toEqual(list.raw());
+		});
+
+		it("each() -> enumerates objects", function() {
+			var elements = [];
+			var keys = [];
+			var obj = { x : 1, y : 2};
+			new Collection(obj).each(function(element, key) {
+				elements.push(element);
+				keys.push(key);
+			});
+			expect(elements).toEqual([1,2]);
+			expect(keys).toEqual(['x','y']);
+		});
+
+
+		it("each() -> to enumerate associative array", function() {
+			var elements = [];
+			var keys = [];
+			var keyArray = new Array();
+			keyArray["one"]  = 1;
+			keyArray["two"]  = 2;
+			keyArray["three"]  = 3;
+
+			new Collection(keyArray).each(function(element, key) {
+				elements.push(element);
+				keys.push(key);
+			});
+			expect(elements).toEqual([1,2,3]);
+			expect(keys).toEqual(['one','two','three']);
 		});
 
 		it("each() -> sends back all indexes", function() {
@@ -600,6 +653,13 @@
 			expect(new Collection(keyList).keys()).toContain('a');
 			expect(new Collection(keyList).keys()).toContain('b');
 			expect(new Collection(keyList).keys().length).toBe(3);
+		});
+
+		it("keys() -> ignores functions", function() {
+			var keyList = { 'a' : 1, 'b' : 2 , 'f' : function () { } };
+			expect(new Collection(keyList).keys()).toContain('a');
+			expect(new Collection(keyList).keys()).toContain('b');
+			expect(new Collection(keyList).keys().length).toBe(2);
 		});
 
 		it("last() -> returns last element (when no predicate)", function() {
