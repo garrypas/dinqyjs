@@ -183,32 +183,7 @@ var Dinqyjs = (function(){
 				return partitions;
 			},
 
-			_useResultSelectorOnGroup = function(array, resultSelector) {
-				var key,
-					thisElement;
-
-				for(key in array) {
-					thisElement = array[key];
-					array[key] = resultSelector(thisElement, key);
-				}
-			
-				return array;
-			};
-
-			Collection.associative = function(object) {
-				for(var i in object) {
-					if(!_isFunction(object[i])) {
-				 		return +object.length === 0;
-				 	}
-				}
-				return FALSE;
-			};
-
-			Collection.configure = function(key, value) {
-				return _config[key] = (arguments.length < 2) ? _config[key] : value;
-			};
-
-			var _sortAndThenSortMore = function(array, direction, selectors) {
+			_sortAndThenSortMore = function(array, direction, selectors) {
 				if(selectors.length < 1) {
 					array.sort();
 				} else {
@@ -237,6 +212,31 @@ var Dinqyjs = (function(){
 				if(direction != 1) {
 					array.reverse();
 				}
+			},
+
+			_useResultSelectorOnGroup = function(array, resultSelector) {
+				var key,
+					thisElement;
+
+				for(key in array) {
+					thisElement = array[key];
+					array[key] = resultSelector(thisElement, key);
+				}
+			
+				return array;
+			};
+
+			Collection.associative = function(object) {
+				for(var i in object) {
+					if(!_isFunction(object[i])) {
+				 		return +object.length === 0;
+				 	}
+				}
+				return FALSE;
+			};
+
+			Collection.configure = function(key, value) {
+				return _config[key] = (arguments.length < 2) ? _config[key] : value;
 			};
 
 			Collection.prototype = {
@@ -546,14 +546,30 @@ var Dinqyjs = (function(){
 					return _getTop1(0, this._, selector);
 				},
 
-				//ToDo: make it a REAL median
-				median : function(/*ToDo add selector*/) {
+				middle : function(evenResolver) {
 					var thisLength = this._.length,
-						index = parseInt((thisLength / 2) - 0.5);
+						index = (thisLength / 2) - 0.5;
+
+						if(evenResolver > 0) {
+							index = Math.ceil(index);
+						}
+
+						index = parseInt(index);
 					return index >= thisLength ? void 0 : this._[index];
 				},
 
-				//ToDo: add "middle" function to actuall select middle element, with option of going up or down for evens
+				median : function(/*selector*/) {
+					var middleFloor,
+						middleCeil,
+						sorted;
+
+					sorted = this.clone();
+					_sortAndThenSortMore(sorted.raw(), 1, arguments);
+					middleFloor = sorted.middle();
+					middleCeil = sorted.middle(1);
+
+					return middleFloor < middleCeil ? ((middleFloor + middleCeil) * 0.5) : middleFloor;
+				},
 
 				min : function(selector) {
 					return _getTop1(1, this._, selector);

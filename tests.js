@@ -799,16 +799,28 @@
 			})).toBe(10);
 		});
 
-		it("median() -> gets the middle value (even number of elements)", function() {
-			expect(list.median()).toBe(5);
+		it("middle() -> gets the middle value (even number of elements)", function() {
+			expect(list.middle()).toBe(5);
 		});
 
-		it("median() -> gets the middle value (odd number of elements)", function() {
-			expect(new Collection([1]).median()).toBe(1);
+		it("middle() -> gets the middle value (even number of elements, resolve upwards)", function() {
+			expect(list.middle(1)).toBe(6);
 		});
 
-		it("median() -> gets undefined when no elements", function() {
-			expect(new Collection().median()).toBe(void 0);
+		it("middle() -> gets the middle value (odd number of elements)", function() {
+			expect(new Collection([1,2,3]).middle()).toBe(2);
+		});
+
+		it("middle() -> gets undefined when no elements", function() {
+			expect(new Collection().middle()).toBe(void 0);
+		});
+
+		it("median() -> gets middle value in odd numbered array", function() {
+			expect(new Collection([1,3,2,4]).median()).toBe(2.5);
+		});
+
+		it("median() -> (x + y) / 2 in even numbered array", function() {
+			expect(new Collection([1,3,5,2,4]).median()).toBe(3);
 		});
 
 		it("min() -> returns the minimum value", function() {
