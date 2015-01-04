@@ -1,9 +1,6 @@
-dinqyjs
-=======
+![Dinqyjs](http://dinqyjs.com/logo.gif)
 
 (for the latest documentation go to dinqyjs.com)
-
-![Dinqyjs](http://dinqyjs.com/logo.gif)
 
 Powerful
 --------
