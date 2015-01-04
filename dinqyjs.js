@@ -183,11 +183,6 @@ var Dinqyjs = (function(){
 				return partitions;
 			},
 
-			_sortArg = function(selector) {
-				var useSelector = _isFunction(selector);
-				return useSelector ? [function(a, b) { return selector(a) - selector(b); }] : [];
-			},
-
 			_useResultSelectorOnGroup = function(array, resultSelector) {
 				var key,
 					thisElement;
@@ -213,6 +208,37 @@ var Dinqyjs = (function(){
 				return _config[key] = (arguments.length < 2) ? _config[key] : value;
 			};
 
+			var _sortAndThenSortMore = function(array, direction, selectors) {
+				if(selectors.length < 1) {
+					array.sort();
+				} else {
+					selectors = _arrayPrototype.slice.call(selectors);
+					array.sort(function(x, y) {
+						var s = 0,
+							result = 0,
+							xSelected,
+							ySelected,
+							thisSelector;
+
+						while(selectors.length && result === 0) {
+							thisSelector = selectors[s++];
+							xSelected = thisSelector(x);
+							ySelected = thisSelector(y);
+							if(xSelected > ySelected) {
+								result = 1;
+							}
+							else if(xSelected < ySelected) {
+								result = -1;
+							}
+						}
+						return result;
+					});
+				}
+				if(direction != 1) {
+					array.reverse();
+				}
+			};
+
 			Collection.prototype = {
 				all : function(predicate) {
 					var all = TRUE, i = 0;
@@ -226,8 +252,8 @@ var Dinqyjs = (function(){
 					return _firstIndex(this._, predicate) >= 0;
 				},
 
-				ascending : function(selector) {
-					_arrayPrototype.sort.apply(this._, _sortArg(selector));
+				ascending : function() {
+					_sortAndThenSortMore(this._, 1, arguments);
 					return this;
 				},
 
@@ -279,8 +305,8 @@ var Dinqyjs = (function(){
 					return this._.length;
 				},
 
-				descending : function(selector) {
-					_arrayPrototype.sort.apply(this._, _sortArg(selector)).reverse();
+				descending : function() {
+					_sortAndThenSortMore(this._, -1, arguments);
 					return this;
 				},
 
@@ -481,6 +507,9 @@ var Dinqyjs = (function(){
 					return _wrap(joined);
 				},
 
+				//ToDo: add interquartile range function http://www.mathsisfun.com/data/quartiles.html
+				//ToDo: add upperquartile and lower quartile functions
+
 				join : function() {
 					return _arrayPrototype.join.apply(this._, arguments);
 				},
@@ -517,11 +546,14 @@ var Dinqyjs = (function(){
 					return _getTop1(0, this._, selector);
 				},
 
-				median : function() {
+				//ToDo: make it a REAL median
+				median : function(/*ToDo add selector*/) {
 					var thisLength = this._.length,
 						index = parseInt((thisLength / 2) - 0.5);
 					return index >= thisLength ? void 0 : this._[index];
 				},
+
+				//ToDo: add "middle" function to actuall select middle element, with option of going up or down for evens
 
 				min : function(selector) {
 					return _getTop1(1, this._, selector);

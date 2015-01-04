@@ -73,6 +73,28 @@
 			expect(thisList.raw()).toEqual([1,2,3]);
 		});
 
+		it("ascending() -> uses selector", function() {
+			var thisList = new Collection([{x : 3}, {x : 1}, {x : 2}]);
+			thisList.ascending(function(element){
+				return element.x; 
+			});
+			expect(thisList.element(0).x).toEqual(1);
+			expect(thisList.element(1).x).toEqual(2);
+			expect(thisList.element(2).x).toEqual(3);
+		});
+
+		it("ascending() -> uses sort by ... then ... method", function() {
+			var thisList = new Collection([{x : 1, y : 2}, {x : 1, y : 3}, {x : 1, y : 1}]);
+			thisList.ascending(function(element){
+				return element.x;
+			}, function(element) {
+				return element.y;
+			});
+			expect(thisList.element(0).y).toEqual(1);
+			expect(thisList.element(1).y).toEqual(2);
+			expect(thisList.element(2).y).toEqual(3);
+		});
+
 		it('associative() -> true if associative array', function() {
 			var associativeArray = [];
 			associativeArray["a"] = 1;
@@ -176,6 +198,28 @@
 			var thisList = new Collection([3,1,2]);
 			thisList.descending();
 			expect(thisList.raw()).toEqual([3,2,1]);
+		});
+
+		it("descending() -> uses selector", function() {
+			var thisList = new Collection([{x : 3}, {x : 1}, {x : 2}]);
+			thisList.descending(function(element){
+				return element.x; 
+			});
+			expect(thisList.element(0).x).toEqual(3);
+			expect(thisList.element(1).x).toEqual(2);
+			expect(thisList.element(2).x).toEqual(1);
+		});
+
+		it("descending() -> uses sort by ... then ... method", function() {
+			var thisList = new Collection([{x : 1, y : 2}, {x : 1, y : 3}, {x : 1, y : 1}]);
+			thisList.descending(function(element){
+				return element.x;
+			}, function(element) {
+				return element.y;
+			});
+			expect(thisList.element(0).y).toEqual(3);
+			expect(thisList.element(1).y).toEqual(2);
+			expect(thisList.element(2).y).toEqual(1);
 		});
 
 		it("difference() -> diffs", function() {
