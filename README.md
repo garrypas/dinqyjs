@@ -1,6 +1,6 @@
 ![Dinqyjs](http://dinqyjs.com/logo.gif)
 
-(for the latest documentation go to dinqyjs.com)
+(For the latest documentation go to [dinqyjs.com](http://dinqyjs.com/ "Dinqyjs website").)
 
 Powerful
 --------
