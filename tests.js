@@ -823,6 +823,12 @@
 			expect(new Collection([1,3,5,2,4]).median()).toBe(3);
 		});
 
+		it("median() -> selects median with selector", function() {
+			expect(new Collection([{ x : 1 },{ x : 3 },{ x : 5 },{ x : 2 },{ x : 4 }]).median(function(element) {
+				return element.x;
+			}).x).toBe(3);
+		});
+
 		it("min() -> returns the minimum value", function() {
 			expect(list.min()).toBe(1);
 		});
