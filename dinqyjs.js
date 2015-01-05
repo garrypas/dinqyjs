@@ -24,6 +24,12 @@ var Dinqyjs = (function(){
 			TRUE = true,
 			FALSE = false,
 
+			_defaultSort = function(x, y) {
+				if(x > y) return 1;
+				if(x < y) return -1;
+				return 0;
+			},
+
 			_differenceXY = function(inner, outer, predicate) {
 				var usePredicate = _isFunction(predicate),
 					i = 0,
@@ -72,22 +78,22 @@ var Dinqyjs = (function(){
 			_errorNotExactlyOneMatch = 'Array does not contain exactly one matching element',
 
 			_arrayPrototype = Array.prototype,
-			_arrayMidpoint = function(array, denominator, evenResolver) {
-				var thisLength = array.length - 1,
+			_arrayMidpoint = function(arrayLength, evenResolver) {
+				var thisLength = arrayLength,
 					index = thisLength /  2;
 				return parseInt(evenResolver > 0 ? Math.ceil(index) : index);
 			},
 
 			_middle = function(array, denominator, evenResolver) {
 				var	thisLength = array.length - 1,
-					index = _arrayMidpoint(array, denominator, evenResolver);
+					index = _arrayMidpoint(array.length, evenResolver);
 				return index >= thisLength ? void 0 : array[index];
 			},
 
 			_firstIndex = function(array, predicate, increments, startIndex, count) {
 				var thisElement,
 					thisLength = array.length;
-				
+
 				increments = increments || 1;
 
 				if(!_isFunction(predicate)) {
@@ -196,7 +202,7 @@ var Dinqyjs = (function(){
 
 			_sortAndThenSortMore = function(array, direction, selectors) {
 				if(selectors.length < 1) {
-					array.sort();
+					array.sort(_defaultSort);
 				} else {
 					selectors = _arrayPrototype.slice.call(selectors);
 					array.sort(function(x, y) {
@@ -233,7 +239,7 @@ var Dinqyjs = (function(){
 					thisElement = array[key];
 					array[key] = resultSelector(thisElement, key);
 				}
-			
+
 				return array;
 			};
 
@@ -545,12 +551,6 @@ var Dinqyjs = (function(){
 					return _arrayPrototype.lastIndexOf.apply(this._, arguments);
 				},
 
-				lowerquartile : function(/*selector*/) {
-					var sorted = this.clone();
-					_sortAndThenSortMore(sorted.raw(), 1, arguments);
-					return _middle(sorted.raw(), 1, 1);
-				},
-
 				map : function() {
 					var mapped = _arrayPrototype.map.apply(this._, arguments);
 					return mapped ? _wrap(mapped) : void 0;
@@ -561,7 +561,7 @@ var Dinqyjs = (function(){
 				},
 
 				middle : function(evenResolver) {
-					return _middle(this._, 2, evenResolver);
+					return this._[_arrayMidpoint(this._.length - 1, evenResolver)];
 				},
 
 				median : function(/*selector*/) {
@@ -732,10 +732,32 @@ var Dinqyjs = (function(){
 					return _arrayPrototype.unshift.apply(this._, arguments);
 				},
 
+				lowerquartile : function(/*selector*/) {
+					var sorted = this.clone();
+					_sortAndThenSortMore(sorted.raw(), 1, arguments);
+					sorted = sorted.raw();
+					var midPoint = _arrayMidpoint(this._.length, 0) - 1;
+					var q1PointA = _arrayMidpoint(midPoint, 0);
+					var q1PointB = _arrayMidpoint(midPoint , 1);
+					if(q1PointB > q1PointA) {
+						return (sorted[q1PointA] + sorted[q1PointB]) * 0.5;
+					} else {
+						return sorted[q1PointA];
+					}
+				},
+
 				upperquartile : function() {
 					var sorted = this.clone();
 					_sortAndThenSortMore(sorted.raw(), 1, arguments);
-					return _middle(sorted.raw(), 3, 0);
+					sorted = sorted.raw();
+					var midPoint = _arrayMidpoint(this._.length, 1) - 1;
+					var q1PointA = midPoint + _arrayMidpoint(midPoint, 0) + 1;
+					var q1PointB = midPoint + _arrayMidpoint(midPoint , 1) + 1;
+					if(q1PointB > q1PointA) {
+						return (sorted[q1PointA] + sorted[q1PointB]) * 0.5;
+					} else {
+						return sorted[q1PointA];
+					}
 				},
 
 				valueOf : function() {
@@ -799,8 +821,8 @@ var Dinqyjs = (function(){
 				};
 			};
 
-		    return Collection; 
-		 
+		    return Collection;
+
 		}())
 	};
 }());

@@ -68,15 +68,15 @@
 		});
 
 		it("ascending() -> sorts the list in ascending order", function() {
-			var thisList = new Collection([3,1,2]);
+			var thisList = new Collection([3,1,2,11]);
 			thisList.ascending();
-			expect(thisList.raw()).toEqual([1,2,3]);
+			expect(thisList.raw()).toEqual([1,2,3,11]);
 		});
 
 		it("ascending() -> uses selector", function() {
 			var thisList = new Collection([{x : 3}, {x : 1}, {x : 2}]);
 			thisList.ascending(function(element){
-				return element.x; 
+				return element.x;
 			});
 			expect(thisList.element(0).x).toEqual(1);
 			expect(thisList.element(1).x).toEqual(2);
@@ -203,7 +203,7 @@
 		it("descending() -> uses selector", function() {
 			var thisList = new Collection([{x : 3}, {x : 1}, {x : 2}]);
 			thisList.descending(function(element){
-				return element.x; 
+				return element.x;
 			});
 			expect(thisList.element(0).x).toEqual(3);
 			expect(thisList.element(1).x).toEqual(2);
@@ -255,7 +255,7 @@
 		});
 
 		it("distinct() -> removes duplicates (with predicate)", function() {
-			expect(new Collection([1,2,2,3]).distinct(function(x, y) 
+			expect(new Collection([1,2,2,3]).distinct(function(x, y)
 			{
 				return x === y && x != 2 && y != 2;
 			}).raw()).toEqual([1, 3]);
@@ -766,8 +766,12 @@
 			expect(list.raw().lastIndexOf(2)).toBe(10);
 		});
 
-		it("lowerquartile() -> returns Q1", function() {
+		it("lowerquartile() -> returns Q1 when 1 element to choose from", function() {
 			expect(list.lowerquartile()).toBe(3);
+		});
+
+		it("lowerquartile() -> returns Q1 when 2 elements to choose from (mean of the two)", function() {
+			expect(new Collection([1,2,3,4,5,6,7,8]).lowerquartile()).toBe(2.5);
 		});
 
 		it("max() -> returns the maximum value", function() {
@@ -1158,8 +1162,12 @@
 			expect(arr.raw()).toEqual([-1, 0, 1, 2, 3]);
 		});
 
-		it("upperquartile() -> returns Q3", function() {
+		it("upperquartile() -> returns Q3 when 1 element to choose from", function() {
 			expect(list.upperquartile()).toBe(8);
+		});
+
+		it("upperquartile() -> returns Q3 when 2 elements to choose from (mean of the two)", function() {
+			expect(new Collection([1,2,3,4,5,6,7,8]).upperquartile()).toBe(6.5);
 		});
 
 		it("where() -> selects matches (with predicate)", function() {
