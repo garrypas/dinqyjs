@@ -1162,12 +1162,17 @@
 			expect(arr.raw()).toEqual([-1, 0, 1, 2, 3]);
 		});
 
+		it("upperquartile() -> returns undefined when set is empty", function() {
+			expect(new Collection([1]).upperquartile()).toBe(void 0);
+		});
+
+
 		it("upperquartile() -> returns Q3 when 1 element to choose from", function() {
 			expect(list.upperquartile()).toBe(8);
 		});
 
 		it("upperquartile() -> returns Q3 when 2 elements to choose from (mean of the two)", function() {
-			expect(new Collection([1,2,3,4,5,6,7,8]).upperquartile()).toBe(6.5);
+			expect(new Collection([1, 2, 3, 4, 5, 6, 7, 8]).upperquartile()).toBe(6.5);
 		});
 
 		it("where() -> selects matches (with predicate)", function() {
