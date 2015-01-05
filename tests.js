@@ -766,6 +766,10 @@
 			expect(list.raw().lastIndexOf(2)).toBe(10);
 		});
 
+		it("lowerquartile() -> returns Q1", function() {
+			expect(list.lowerquartile()).toBe(3);
+		});
+
 		it("max() -> returns the maximum value", function() {
 			expect(list.max()).toBe(10);
 		});
@@ -1152,6 +1156,10 @@
 			var arr = new Collection([1, 2, 3]);
 			arr.unshift(-1, 0);
 			expect(arr.raw()).toEqual([-1, 0, 1, 2, 3]);
+		});
+
+		it("upperquartile() -> returns Q3", function() {
+			expect(list.upperquartile()).toBe(8);
 		});
 
 		it("where() -> selects matches (with predicate)", function() {

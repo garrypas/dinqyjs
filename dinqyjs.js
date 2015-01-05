@@ -72,6 +72,17 @@ var Dinqyjs = (function(){
 			_errorNotExactlyOneMatch = 'Array does not contain exactly one matching element',
 
 			_arrayPrototype = Array.prototype,
+			_arrayMidpoint = function(array, denominator, evenResolver) {
+				var thisLength = array.length - 1,
+					index = thisLength /  2;
+				return parseInt(evenResolver > 0 ? Math.ceil(index) : index);
+			},
+
+			_middle = function(array, denominator, evenResolver) {
+				var	thisLength = array.length - 1,
+					index = _arrayMidpoint(array, denominator, evenResolver);
+				return index >= thisLength ? void 0 : array[index];
+			},
 
 			_firstIndex = function(array, predicate, increments, startIndex, count) {
 				var thisElement,
@@ -507,9 +518,6 @@ var Dinqyjs = (function(){
 					return _wrap(joined);
 				},
 
-				//ToDo: add interquartile range function http://www.mathsisfun.com/data/quartiles.html
-				//ToDo: add upperquartile and lower quartile functions
-
 				join : function() {
 					return _arrayPrototype.join.apply(this._, arguments);
 				},
@@ -537,6 +545,12 @@ var Dinqyjs = (function(){
 					return _arrayPrototype.lastIndexOf.apply(this._, arguments);
 				},
 
+				lowerquartile : function(/*selector*/) {
+					var sorted = this.clone();
+					_sortAndThenSortMore(sorted.raw(), 1, arguments);
+					return _middle(sorted.raw(), 1, 1);
+				},
+
 				map : function() {
 					var mapped = _arrayPrototype.map.apply(this._, arguments);
 					return mapped ? _wrap(mapped) : void 0;
@@ -547,15 +561,7 @@ var Dinqyjs = (function(){
 				},
 
 				middle : function(evenResolver) {
-					var thisLength = this._.length,
-						index = (thisLength / 2) - 0.5;
-
-						if(evenResolver > 0) {
-							index = Math.ceil(index);
-						}
-
-						index = parseInt(index);
-					return index >= thisLength ? void 0 : this._[index];
+					return _middle(this._, 2, evenResolver);
 				},
 
 				median : function(/*selector*/) {
@@ -724,6 +730,12 @@ var Dinqyjs = (function(){
 
 				unshift : function() {
 					return _arrayPrototype.unshift.apply(this._, arguments);
+				},
+
+				upperquartile : function() {
+					var sorted = this.clone();
+					_sortAndThenSortMore(sorted.raw(), 1, arguments);
+					return _middle(sorted.raw(), 3, 0);
 				},
 
 				valueOf : function() {
