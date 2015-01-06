@@ -15,7 +15,6 @@ var Dinqyjs = (function(){
 		    function Collection(array){
 		    	this._ = array || [];
 		    }
-
 			var _config = {
 				ARRAY_PREALLOCATION : 64000
 			},
@@ -23,6 +22,14 @@ var Dinqyjs = (function(){
 			NULL = null,
 			TRUE = true,
 			FALSE = false,
+
+			_arrayPrototype = Array.prototype,
+
+			_arrayMidpoint = function(arrayLength, evenResolver) {
+				var thisLength = arrayLength,
+				index = thisLength /  2;
+				return parseInt(evenResolver > 0 ? Math.ceil(index) : index);
+			},
 
 			_defaultSort = function(x, y) {
 				if(x > y) return 1;
@@ -76,13 +83,6 @@ var Dinqyjs = (function(){
 
 			_errorNoMatches = 'Array contains no matching elements',
 			_errorNotExactlyOneMatch = 'Array does not contain exactly one matching element',
-
-			_arrayPrototype = Array.prototype,
-			_arrayMidpoint = function(arrayLength, evenResolver) {
-				var thisLength = arrayLength,
-					index = thisLength /  2;
-				return parseInt(evenResolver > 0 ? Math.ceil(index) : index);
-			},
 
 			_firstIndex = function(array, predicate, increments, startIndex, count) {
 				var thisElement,
@@ -146,36 +146,17 @@ var Dinqyjs = (function(){
 				};
 			},
 
-			_wrap = function(array) {
-				return array._ ?  array : new Collection(array);
-			},
-
-			_unwrap = function(Collection) {
-				return Collection._ || Collection;
-			},
-
-			_total = function(array, summingFunction, selector) {
-				var total = NULL,
-					i = array.length - 1,
-					thisElement,
-					usePredicate = _isFunction(selector),
-					toAdd;
-
-				while(i >= 0) {
-					thisElement = array[i--];
-					toAdd = usePredicate ? selector(thisElement) : thisElement;
-					total = (total === NULL ? toAdd : summingFunction(total, toAdd));
-				}
-				return total;
+			_minitabVariation = function(q, n) {
+				return 1 / 4 * (q * n + q);
 			},
 
 			_partition = function(array, keySelector, elementSelector, resultSelector) {
 				var i = 0,
-					thisElement,
-					partitions = [],
-					p,
-					useElementSelector = _isFunction(elementSelector),
-					useResultSelector = _isFunction(resultSelector);
+				thisElement,
+				partitions = [],
+				p,
+				useElementSelector = _isFunction(elementSelector),
+				useResultSelector = _isFunction(resultSelector);
 
 				while(i < array.length) {
 					thisElement = array[i++];
@@ -194,33 +175,32 @@ var Dinqyjs = (function(){
 				return partitions;
 			},
 
-			_minitabVariation = function(q, n) {
-				return 1 / 4 * (q * n + q);
-			},
 
 			//This uses the minitab method to get quartiles
 			_quartile = function(collection, q, selector) {
 				if(collection.count() < 1) {
 					return void 0;
 				}
-				var useSelector = _isFunction(selector);
+				var useSelector = _isFunction(selector),
+				sorted,
+				quartilePosition,
+				lowerIndex,
+				upperIndex,
+				lowerElement,
+				upperElement;
 
 				//Set up a clone of the array
-				var sorted = collection.clone();
+				sorted = collection.clone();
 				_sortAndThenSortMore(sorted.raw(), 1, selector);
 				sorted = sorted.raw();
 
-				var quartilePosition = _minitabVariation(q, collection.count());
-				var lowerIndex = parseInt(quartilePosition);
-				var upperIndex = parseInt(Math.ceil(quartilePosition));
+				quartilePosition = _minitabVariation(q, collection.count());
+				lowerIndex = parseInt(quartilePosition);
+				upperIndex = parseInt(Math.ceil(quartilePosition));
+				lowerElement = useSelector ? selector(sorted[lowerIndex - 1]) : sorted[lowerIndex - 1];
+				upperElement = useSelector ? selector(sorted[upperIndex - 1]) : sorted[upperIndex - 1];
 
-				if(upperIndex > lowerIndex) {
-					return useSelector ? selector(sorted[lowerIndex - 1]) : sorted[lowerIndex - 1];
-				}
-				return (
-					(useSelector ? selector(sorted[lowerIndex - 1]) : sorted[lowerIndex - 1]) +
-					(useSelector ? selector(sorted[upperIndex - 1]) : sorted[upperIndex - 1])
-				) / 2;
+				return upperIndex > lowerIndex ? lowerElement : (lowerElement + upperElement) / 2;
 			},
 
 			_sortAndThenSortMore = function(array, direction, selectors) {
@@ -259,6 +239,25 @@ var Dinqyjs = (function(){
 				}
 			},
 
+			_total = function(array, summingFunction, selector) {
+				var total = NULL,
+				i = array.length - 1,
+				thisElement,
+				usePredicate = _isFunction(selector),
+				toAdd;
+
+				while(i >= 0) {
+					thisElement = array[i--];
+					toAdd = usePredicate ? selector(thisElement) : thisElement;
+					total = (total === NULL ? toAdd : summingFunction(total, toAdd));
+				}
+				return total;
+			},
+
+			_unwrap = function(Collection) {
+				return Collection._ || Collection;
+			},
+
 			_useResultSelectorOnGroup = function(array, resultSelector) {
 				var key,
 					thisElement;
@@ -269,6 +268,10 @@ var Dinqyjs = (function(){
 				}
 
 				return array;
+			},
+
+			_wrap = function(array) {
+				return array._ ?  array : new Collection(array);
 			};
 
 			Collection.associative = function(object) {
