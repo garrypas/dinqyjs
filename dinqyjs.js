@@ -183,25 +183,27 @@ var Dinqyjs = (function() {
 
 			//This uses the minitab method to get quartiles
 			_quartile = function(collection, q, selector) {
-				if (collection.count() < 1) {
+				var useSelector = _isFunction(selector),
+					sorted,
+					quartilePosition,
+					lowerIndex,
+					upperIndex,
+					lowerElement,
+					upperElement,
+					lowerValue,
+					upperValue,
+					collectionLength = collection.count();
+
+				if (collectionLength < 1) {
 					return void 0;
 				}
-				var useSelector = _isFunction(selector),
-				sorted,
-				quartilePosition,
-				lowerIndex,
-				upperIndex,
-				lowerElement,
-				upperElement,
-				lowerValue,
-				upperValue;
 
 				//Set up a clone of the array
-				sorted = collection.clone();
+				sorted = collection.concat();
 				_sortAndThenSortMore(sorted.raw(), 1, selector);
 				sorted = sorted.raw();
 
-				quartilePosition = _minitabVariation(q, collection.count());
+				quartilePosition = _minitabVariation(q, collectionLength);
 				lowerIndex = parseInt(quartilePosition);
 				upperIndex = parseInt(Math.ceil(quartilePosition));
 				lowerValue = sorted[lowerIndex - 1];
@@ -210,6 +212,10 @@ var Dinqyjs = (function() {
 				upperElement = useSelector ? selector(upperValue) : upperValue;
 
 				return upperIndex > lowerIndex ? lowerElement : (lowerElement + upperElement) / 2;
+			},
+
+			_randomForSorting = function() {
+				return Math.random() - 0.5;
 			},
 
 			_sortAndThenSortMore = function(array, selectors) {
@@ -789,18 +795,8 @@ var Dinqyjs = (function() {
 					return _arrayPrototype.shift.apply(this._, arguments);
 				},
 
-				//Use Fisher-Yates shuffle algorithm
 				shuffle: function() {
-					var i = this._.length - 1,
-						thisElement,
-						random;
-
-					while (i >= 0) {
-                        random = Math.floor(Math.random() * this._.length);
-						thisElement = this._[i];
-						this._[i--] = this._[random];
-						this._[ random ] = thisElement;
-       				}
+					this._.sort(_randomForSorting);
 					return this;
 				},
 
