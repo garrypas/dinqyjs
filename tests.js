@@ -194,7 +194,7 @@
 			expect(list.count()).toBe(list.count());
 		});
 
-		it("descending() -> sorts the list in ascending order", function() {
+		it("descending() -> sorts the list in descending order", function() {
 			var thisList = new Collection([3,1,2]);
 			thisList.descending();
 			expect(thisList.raw()).toEqual([3,2,1]);
@@ -869,6 +869,46 @@
 			})).toBe(60);
 		});
 
+		it("orderBy() -> uses sort ascending then descending", function() {
+			var thisList = new Collection([{x : 1, y : 2}, {x : 1, y : 3}, {x : 1, y : 1}, {x : 2, y : 3}, {x : 2, y : 1}]);
+			thisList.ascending(function(element){
+				return element.x;
+			}, 'asc',
+			function(element) {
+				return element.y;
+			}, 'desc');
+			expect(thisList.element(0).x).toBe(1);
+			expect(thisList.element(0).y).toBe(3);
+			expect(thisList.element(1).x).toBe(1);
+			expect(thisList.element(1).y).toBe(2);
+			expect(thisList.element(2).x).toBe(1);
+			expect(thisList.element(2).y).toBe(1);
+			expect(thisList.element(3).x).toBe(2);
+			expect(thisList.element(3).y).toBe(3);
+			expect(thisList.element(4).x).toBe(2);
+			expect(thisList.element(4).y).toBe(1);
+		});
+
+		it("orderBy() -> uses ascending by default", function() {
+			var thisList = new Collection([{x : 1, y : 2}, {x : 1, y : 3}, {x : 1, y : 1}, {x : 2, y : 3}, {x : 2, y : 1}]);
+			thisList.ascending(function(element){
+				return element.x;
+			},
+			function(element) {
+				return element.y;
+			}, 'desc');
+			expect(thisList.element(0).x).toBe(1);
+			expect(thisList.element(0).y).toBe(3);
+			expect(thisList.element(1).x).toBe(1);
+			expect(thisList.element(1).y).toBe(2);
+			expect(thisList.element(2).x).toBe(1);
+			expect(thisList.element(2).y).toBe(1);
+			expect(thisList.element(3).x).toBe(2);
+			expect(thisList.element(3).y).toBe(3);
+			expect(thisList.element(4).x).toBe(2);
+			expect(thisList.element(4).y).toBe(1);
+		});
+
 		it("outerJoin() -> joins with nulls", function() {
 			var sets = createJoinSets();
 
@@ -1179,7 +1219,7 @@
 		});
 
 		it("upperquartile() -> returns Q3 with selector", function() {
-			expect(new Collection([{ x : 1 }, { x : 2 }, { x : 3 }, { x : 4 }, { x : 5 }]).upperquartile(function(element) { 
+			expect(new Collection([{ x : 1 }, { x : 2 }, { x : 3 }, { x : 4 }, { x : 5 }]).upperquartile(function(element) {
 				return element.x;
 			})).toBe(4);
 		});
@@ -1189,5 +1229,13 @@
 				return element > 5;
 			}).raw();
 			expect(selection).toEqual([ 6,7,8,9,10 ]);
+		});
+
+		it("zip() -> zips", function() {
+			var zip = Collection.zip([1],[2,4],[3,5,6,7]).raw();
+			expect(zip[0]).toEqual([1,2,3]);
+			expect(zip[1]).toEqual([4,5]);
+			expect(zip[2]).toEqual([6]);
+			expect(zip[3]).toEqual([7]);
 		});
 	});
