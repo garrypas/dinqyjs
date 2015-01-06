@@ -315,10 +315,10 @@
 		it("each() -> to enumerate associative array", function() {
 			var elements = [];
 			var keys = [];
-			var keyArray = new Array();
-			keyArray["one"]  = 1;
-			keyArray["two"]  = 2;
-			keyArray["three"]  = 3;
+			var keyArray = [];
+			keyArray[ "one" ] = 1;
+			keyArray[ "two" ] = 2;
+			keyArray[ "three" ] = 3;
 
 			new Collection(keyArray).each(function(element, key) {
 				elements.push(element);
@@ -343,7 +343,7 @@
 		it("element() -> gets element by key", function() {
 			var array = [];
 			array.push(1);
-			array['key'] = 99;
+			array[ "key" ] = 99;
 			expect(new Collection(array).element('key')).toBe(99);
 		});
 
@@ -579,7 +579,6 @@
 			expect(list.indexOf(2)).toBe(1);
 		});
 
-
 		it("innerJoin() -> joins", function() {
 			var sets = createJoinSets();
 			var joined = sets.inner.innerJoin(sets.outer, function(inner, outer) {
@@ -664,6 +663,19 @@
 		it("insertRange() -> inserts arguments", function() {
 			list.insertRange(1, 100, 101);
 			expect(list.raw()).toEqual([1,100,101,2,3,4,5,6,7,8,9,10]);
+		});
+
+		it("interquartileRange() -> calculates interquartile range", function() {
+			expect(list.interquartileRange()).toBe(6);
+		});
+
+		it("interquartileRange() -> calculates interquartile range with selector", function() {
+			var collectionOfObjects = list.map(function(element) {
+				return { x : element };
+			});
+			expect(collectionOfObjects.interquartileRange(function(element) {
+				return element.x;
+			})).toBe(6);
 		});
 
 		it("interset() -> intersects", function() {

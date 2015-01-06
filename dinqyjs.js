@@ -192,7 +192,9 @@ var Dinqyjs = (function() {
 				lowerIndex,
 				upperIndex,
 				lowerElement,
-				upperElement;
+				upperElement,
+				lowerValue,
+				upperValue;
 
 				//Set up a clone of the array
 				sorted = collection.clone();
@@ -202,8 +204,10 @@ var Dinqyjs = (function() {
 				quartilePosition = _minitabVariation(q, collection.count());
 				lowerIndex = parseInt(quartilePosition);
 				upperIndex = parseInt(Math.ceil(quartilePosition));
-				lowerElement = useSelector ? selector(sorted[lowerIndex - 1]) : sorted[lowerIndex - 1];
-				upperElement = useSelector ? selector(sorted[upperIndex - 1]) : sorted[upperIndex - 1];
+				lowerValue = sorted[lowerIndex - 1];
+				upperValue = sorted[upperIndex - 1];
+				lowerElement = useSelector ? selector(lowerValue) : lowerValue;
+				upperElement = useSelector ? selector(upperValue) : upperValue;
 
 				return upperIndex > lowerIndex ? lowerElement : (lowerElement + upperElement) / 2;
 			},
@@ -615,6 +619,10 @@ var Dinqyjs = (function() {
 						}
 					}
 					return _wrap(joined);
+				},
+
+				interquartileRange: function(selector) {
+					return this.upperquartile(selector) - this.lowerquartile(selector);
 				},
 
 				join: function() {
