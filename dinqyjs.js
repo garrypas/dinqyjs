@@ -61,8 +61,7 @@ var Dinqyjs = (function() {
 				while (i < inner.length) {
 					x = inner[i++];
 					j = 0;
-					while (j < outerLength)
-					{
+					while (j < outerLength)	{
 						y = outer[j];
 						if(usePredicate && predicate(x, y) || !usePredicate && x === y) {
 							break;
@@ -199,9 +198,8 @@ var Dinqyjs = (function() {
 				}
 
 				//Set up a clone of the array
-				sorted = collection.concat();
-				_sortAndThenSortMore(sorted.raw(), 1, selector);
-				sorted = sorted.raw();
+				sorted = collection.raw().concat();
+				_sortAndThenSortMore(sorted, 1, selector);
 
 				quartilePosition = _minitabVariation(q, collectionLength);
 				lowerIndex = parseInt(quartilePosition);
@@ -219,47 +217,51 @@ var Dinqyjs = (function() {
 			},
 
 			_sortAndThenSortMore = function(array, selectors) {
-				if (!selectors || selectors.length < 1) {
+				var selectorsLength = selectors.length,
+					s,
+					result,
+					xSelected,
+					ySelected,
+					thisSelector,
+					direction;
+
+				if (!selectors || selectorsLength < 1) {
 					array.sort(_defaultSort);
-				} else {
-					if (_isFunction(selectors)) {
-						selectors = [ selectors ];
-					} else {
-						selectors = _arrayPrototype.slice.call(selectors);
-					}
-					array.sort(function(x, y) {
-						var s = 0,
-							result = 0,
-							xSelected,
-							ySelected,
-							thisSelector,
-							nextSelector,
-							direction;
-						while (s < selectors.length && result === 0) {
-							thisSelector = selectors[s++];
-							if (!_isFunction(thisSelector)) {
-								continue;
-							}
-
-							direction = 0;
-							if (s < selectors.length) {
-								nextSelector = selectors[s];
-								if (typeof nextSelector == "string") {
-									direction = nextSelector.indexOf("des") === 0 ? 1 : 0;
-								}
-							}
-
-							xSelected = thisSelector(x);
-							ySelected = thisSelector(y);
-							if (xSelected < ySelected) {
-								result = direction ? 1 : -1;
-							} else if (xSelected > ySelected) {
-								result = direction ? -1 : 1;
-							}
-						}
-						return result;
-					});
+					return;
 				}
+
+				selectors = _isFunction(selectors) ?
+					selectors = [ selectors ] :
+					_arrayPrototype.slice.call(selectors);
+
+				array.sort(function(x, y) {
+					s = 0;
+					result = 0;
+
+					while (s < selectorsLength && result === 0) {
+						thisSelector = selectors[s++];
+						if (!_isFunction(thisSelector)) {
+							continue;
+						}
+
+						direction = 0;
+						if (s < selectorsLength &&
+							typeof selectors[s] == "string" &&
+							selectors[s].indexOf("des") === 0
+						) {
+								direction = 1;
+						}
+
+						xSelected = thisSelector(x);
+						ySelected = thisSelector(y);
+						if (xSelected < ySelected) {
+							result = direction ? 1 : -1;
+						} else if (xSelected > ySelected) {
+							result = direction ? -1 : 1;
+						}
+					}
+					return result;
+				});
 			},
 
 			_total = function(array, summingFunction, selector) {
