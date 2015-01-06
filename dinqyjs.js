@@ -84,12 +84,6 @@ var Dinqyjs = (function(){
 				return parseInt(evenResolver > 0 ? Math.ceil(index) : index);
 			},
 
-			_middle = function(array, denominator, evenResolver) {
-				var	thisLength = array.length - 1,
-					index = _arrayMidpoint(array.length, evenResolver);
-				return index >= thisLength ? void 0 : array[index];
-			},
-
 			_firstIndex = function(array, predicate, increments, startIndex, count) {
 				var thisElement,
 					thisLength = array.length;
@@ -200,27 +194,45 @@ var Dinqyjs = (function(){
 				return partitions;
 			},
 
-			_quartile = function(q, array) {
-				var midPoint = _arrayMidpoint(array.length, 1);
-				var quarterPoint = midPoint + (-2 + q) * (midPoint / 4);
+			_minitabVariation = function(q, n) {
+				return 1 / 4 * (q * n + q);
+			},
 
-				var q1PointA = parseInt(quarterPoint);
-				var q1PointB = parseInt(Math.ceil(quarterPoint));
-
-				alert(quarterPoint);
-
-				if(q1PointB > q1PointA) {
-					return (array[q1PointA] + array[q1PointB]) * 0.5;
-				} else {
-					return array[q1PointA];
+			//This uses the minitab method to get quartiles
+			_quartile = function(collection, q, selector) {
+				if(collection.count() < 1) {
+					return void 0;
 				}
+				var useSelector = _isFunction(selector);
+
+				//Set up a clone of the array
+				var sorted = collection.clone();
+				_sortAndThenSortMore(sorted.raw(), 1, selector);
+				sorted = sorted.raw();
+
+				var quartilePosition = _minitabVariation(q, collection.count());
+				var lowerIndex = parseInt(quartilePosition);
+				var upperIndex = parseInt(Math.ceil(quartilePosition));
+
+				if(upperIndex > lowerIndex) {
+					return useSelector ? selector(sorted[lowerIndex - 1]) : sorted[lowerIndex - 1];
+				}
+				return (
+					(useSelector ? selector(sorted[lowerIndex - 1]) : sorted[lowerIndex - 1]) +
+					(useSelector ? selector(sorted[upperIndex - 1]) : sorted[upperIndex - 1])
+				) / 2;
 			},
 
 			_sortAndThenSortMore = function(array, direction, selectors) {
-				if(selectors.length < 1) {
+				if(!selectors || selectors.length < 1) {
 					array.sort(_defaultSort);
 				} else {
-					selectors = _arrayPrototype.slice.call(selectors);
+
+					if(_isFunction(selectors)) {
+						selectors = [selectors];
+					} else {
+						selectors = _arrayPrototype.slice.call(selectors);
+					}
 					array.sort(function(x, y) {
 						var s = 0,
 							result = 0,
@@ -228,7 +240,7 @@ var Dinqyjs = (function(){
 							ySelected,
 							thisSelector;
 
-						while(selectors.length && result === 0) {
+						while(s < selectors.length && result === 0) {
 							thisSelector = selectors[s++];
 							xSelected = thisSelector(x);
 							ySelected = thisSelector(y);
@@ -567,6 +579,10 @@ var Dinqyjs = (function(){
 					return _arrayPrototype.lastIndexOf.apply(this._, arguments);
 				},
 
+				lowerquartile : function(selector) {
+					return _quartile(this, 1, selector);
+				},
+
 				map : function() {
 					var mapped = _arrayPrototype.map.apply(this._, arguments);
 					return mapped ? _wrap(mapped) : void 0;
@@ -748,32 +764,8 @@ var Dinqyjs = (function(){
 					return _arrayPrototype.unshift.apply(this._, arguments);
 				},
 
-				lowerquartile : function(/*selector*/) {
-					var sorted = this.clone();
-					_sortAndThenSortMore(sorted.raw(), 1, arguments);
-					sorted = sorted.raw();
-					var midPoint = _arrayMidpoint(this._.length, 0);
-					var q1PointA = _arrayMidpoint(midPoint - 1, 0);
-					var q1PointB = _arrayMidpoint(midPoint - 1, 1);
-					if(q1PointB > q1PointA) {
-						return (sorted[q1PointA] + sorted[q1PointB]) * 0.5;
-					} else {
-						return sorted[q1PointA];
-					}
-				},
-
-				upperquartile : function() {
-					var sorted = this.clone();
-					_sortAndThenSortMore(sorted.raw(), 1, arguments);
-					sorted = sorted.raw();
-					var midPoint = _arrayMidpoint(this._.length, 1);
-					var q1PointA = midPoint + _arrayMidpoint(midPoint - 1, 0);
-					var q1PointB = midPoint + _arrayMidpoint(midPoint - 1, 1);
-					if(q1PointB > q1PointA) {
-						return (sorted[q1PointA] + sorted[q1PointB]) * 0.5;
-					} else {
-						return sorted[q1PointA];
-					}
+				upperquartile : function(selector) {
+					return _quartile(this, 3, selector);
 				},
 
 				valueOf : function() {

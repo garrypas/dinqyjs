@@ -766,12 +766,16 @@
 			expect(list.raw().lastIndexOf(2)).toBe(10);
 		});
 
-		it("lowerquartile() -> returns Q1 when 1 element to choose from", function() {
-			expect(list.lowerquartile()).toBe(3);
+		it("lowerquartile() -> returns Q1 when 1 element in middle of Q1", function() {
+			expect(list.lowerquartile()).toBe(2);
 		});
 
 		it("lowerquartile() -> returns Q1 when 2 elements to choose from (mean of the two)", function() {
-			expect(new Collection([1,2,3,4,5,6,7,8]).lowerquartile()).toBe(2.5);
+			expect(new Collection([1,2,3,4,5,6,7,8]).lowerquartile()).toBe(2);
+		});
+
+		it("lowerquartile() -> returns Q1 when 2 elements to choose from (mean of the two)", function() {
+			expect(new Collection([1,2,3,4,5,6,7,8]).lowerquartile()).toBe(2);
 		});
 
 		it("max() -> returns the maximum value", function() {
@@ -1163,16 +1167,21 @@
 		});
 
 		it("upperquartile() -> returns undefined when set is empty", function() {
-			expect(new Collection([1]).upperquartile()).toBe(void 0);
+			expect(new Collection([]).upperquartile()).toBe(void 0);
 		});
-
 
 		it("upperquartile() -> returns Q3 when 1 element to choose from", function() {
 			expect(list.upperquartile()).toBe(8);
 		});
 
 		it("upperquartile() -> returns Q3 when 2 elements to choose from (mean of the two)", function() {
-			expect(new Collection([1, 2, 3, 4, 5, 6, 7, 8]).upperquartile()).toBe(6.5);
+			expect(new Collection([1, 2, 3, 4, 5, 6, 7, 8]).upperquartile()).toBe(6);
+		});
+
+		it("upperquartile() -> returns Q3 with selector", function() {
+			expect(new Collection([{ x : 1 }, { x : 2 }, { x : 3 }, { x : 4 }, { x : 5 }]).upperquartile(function(element) { 
+				return element.x;
+			})).toBe(4);
 		});
 
 		it("where() -> selects matches (with predicate)", function() {
