@@ -65,7 +65,7 @@ var Dinqyjs = (function() {
 						y = outer[j];
 						if(usePredicate && predicate(x, y) || !usePredicate && x === y) {
 							break;
-						}
+						} 
 						j++;
 					}
 					if (j === outerLength) {
