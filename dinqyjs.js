@@ -14,6 +14,7 @@ var Dinqyjs = (function() {
 		    function Collection(array) {
 				this._ = array || [];
 		    }
+
 			var _config = {
 				ARRAY_PREALLOCATION: 64000
 			},
@@ -162,6 +163,10 @@ var Dinqyjs = (function() {
 
 			_minitabVariation = function(q, n) {
 				return 1 / 4 * (q * n + q);
+			},
+
+			_multiply = function(runningTotal, value) {
+				return runningTotal * value;
 			},
 
 			_partition = function(array, keySelector, elementSelector, resultSelector) {
@@ -376,15 +381,8 @@ var Dinqyjs = (function() {
 				},
 
 				average: function(selector) {
-					var total = 0,
-						i = 0,
-						thisLength = this._.length;
-
-					while (i < thisLength) {
-						total += selector ? selector(this._[i]) : this._[i];
-						i++;
-					}
-					return thisLength ? (total / thisLength) : 0;
+					var thisLength = this._.length;
+					return thisLength ? this.sum(selector) / thisLength : 0;
 				},
 
 				clear: function() {
@@ -425,8 +423,8 @@ var Dinqyjs = (function() {
 				},
 
 				difference: function(other, predicate) {
-					other = _unwrap(other);
 					var thisUnwrapped = this._;
+					other = _unwrap(other);
 					return _differenceXY(thisUnwrapped, other, predicate)
 							.union(_differenceXY(other, thisUnwrapped, predicate));
 				},
@@ -471,8 +469,7 @@ var Dinqyjs = (function() {
 					//Touch the first element to see if this an associative array:
 					if (thisLength === +thisLength && !Collection.associative(this._)) {
 						while (i < thisLength) {
-							callback(this._[i], i);
-							i++;
+							callback(this._[i], i++);
 						}
 					} else {
 						_eachKeys(this._, callback);
@@ -529,7 +526,7 @@ var Dinqyjs = (function() {
 
 				flatten: function() {
 					var i = 0,
-						flattened = new Collection(),
+						flattened = _wrap([]),
 						thisElement;
 					while (i < this._.length) {
 						thisElement = this._[i++];
@@ -670,14 +667,10 @@ var Dinqyjs = (function() {
 					return _getTop1(0, this._, selector);
 				},
 
-				middle: function(evenResolver) {
-					return this._[_arrayMidpoint(this._.length - 1, evenResolver)];
-				},
-
 				median: function(/*selector*/) {
 					var middleFloor,
-						middleCeil,
-						sorted;
+					middleCeil,
+					sorted;
 
 					sorted = this.clone();
 					_sortAndThenSortMore(sorted.raw(), arguments);
@@ -685,8 +678,12 @@ var Dinqyjs = (function() {
 					middleCeil = sorted.middle(1);
 
 					return middleFloor < middleCeil ?
-							((middleFloor + middleCeil) * 0.5) :
-							middleFloor;
+					((middleFloor + middleCeil) * 0.5) :
+					middleFloor;
+				},
+
+				middle: function(evenResolver) {
+					return this._[_arrayMidpoint(this._.length - 1, evenResolver)];
 				},
 
 				min: function(selector) {
@@ -694,9 +691,7 @@ var Dinqyjs = (function() {
 				},
 
 				multiply: function(selector) {
-					return this._.length > 0 ? _total(this._, function(runningTotal, value) {
-						return runningTotal * value;
-					}, selector) : 0;
+					return this._.length > 0 ? _total(this._, _multiply, selector) : 0;
 				},
 
 				outerJoin: function(other, predicate, joinedObjectCreator) {
@@ -724,7 +719,7 @@ var Dinqyjs = (function() {
 							outerElement = other[j++];
 							if (usePredicate && predicate(innerElement, outerElement) ||
 								!usePredicate && innerElement === outerElement
-								) {
+							) {
 								outerFound = 1;
 								joined.push(joinedObjectCreator(innerElement, outerElement));
 							}
