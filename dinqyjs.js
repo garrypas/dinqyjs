@@ -5,7 +5,7 @@
  * Released under the MIT license
  * http://dinqyjs.com/license
  *
- * Date: 2015-01-03
+ * Date: 2015-01-07
  */
 var Dinqyjs = (function() {
 	"use strict";
@@ -21,14 +21,14 @@ var Dinqyjs = (function() {
 			NULL = null,
 			TRUE = true,
 			FALSE = false,
+			ARRAY = Array,
+			ARRAY_PROTOTYPE = ARRAY.prototype,
 
 			_arrayElementCompare = function(element) {
 				return function(other) {
 					return element === other;
 				};
 			},
-
-			_arrayPrototype = Array.prototype,
 
 			_arrayMidpoint = function(arrayLength, evenResolver) {
 				var thisLength = arrayLength,
@@ -38,10 +38,6 @@ var Dinqyjs = (function() {
 
 			_defaultSort = function(x, y) {
 				return x > y ? 1 : (x < y ? -1 : 0);
-			},
-
-			_defaultSortDesc = function(x, y) {
-				return x > y ? -1 : (x < y ? 1 : 0);
 			},
 
 			_differenceXY = function(inner, outer, predicate) {
@@ -63,7 +59,7 @@ var Dinqyjs = (function() {
 					j = 0;
 					while (j < outerLength)	{
 						y = outer[j];
-						if(usePredicate && predicate(x, y) || !usePredicate && x === y) {
+						if (usePredicate && predicate(x, y) || !usePredicate && x === y) {
 							break;
 						}
 						j++;
@@ -129,7 +125,10 @@ var Dinqyjs = (function() {
 				while (i < thisLength) {
 					thisElement = arr[i++];
 					elementToCheckAgainst = (useSelector ? selector(thisElement) : thisElement);
-					if (comparison ? elementToCheckAgainst <= extreme : elementToCheckAgainst >= extreme) {
+					if (comparison ?
+						elementToCheckAgainst <= extreme :
+						elementToCheckAgainst >= extreme
+					) {
 						extreme = thisElement;
 					}
 				}
@@ -232,7 +231,7 @@ var Dinqyjs = (function() {
 
 				selectors = _isFunction(selectors) ?
 					selectors = [ selectors ] :
-					_arrayPrototype.slice.call(selectors);
+					ARRAY_PROTOTYPE.slice.call(selectors);
 
 				array.sort(function(x, y) {
 					s = 0;
@@ -399,7 +398,7 @@ var Dinqyjs = (function() {
 				},
 
 				concat: function() {
-					return _wrap(_arrayPrototype.concat.apply(this._, arguments));
+					return _wrap(ARRAY_PROTOTYPE.concat.apply(this._, arguments));
 				},
 
 				contains: function(item) {
@@ -537,7 +536,7 @@ var Dinqyjs = (function() {
 					while (i < this._.length) {
 						thisElement = this._[i++];
 						Collection.prototype.push.apply(
-							flattened, Array.isArray(thisElement) ?
+							flattened, ARRAY.isArray(thisElement) ?
 							thisElement :
 							[ thisElement ]
 						);
@@ -559,7 +558,7 @@ var Dinqyjs = (function() {
 				},
 
 				indexOf: function() {
-					return _arrayPrototype.indexOf.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.indexOf.apply(this._, arguments);
 				},
 
 				insert: function(index, element) {
@@ -570,9 +569,9 @@ var Dinqyjs = (function() {
 					var args = [ index, 0 ].concat(
 						arguments.length < 3 ?
 						_unwrap(elements) :
-						_arrayPrototype.slice.call(arguments, 1)
+						ARRAY_PROTOTYPE.slice.call(arguments, 1)
 					);
-					_arrayPrototype.splice.apply(this._, args);
+					ARRAY_PROTOTYPE.splice.apply(this._, args);
 				},
 
 				intersect: function(other, predicate) {
@@ -603,7 +602,7 @@ var Dinqyjs = (function() {
 
 				innerJoin: function(other, predicate, joinedObjectCreator) {
 					other = _unwrap(other);
-					if (!Array.isArray(other)) {
+					if (!ARRAY.isArray(other)) {
 						return this.clone();
 					}
 					if (!_isFunction(joinedObjectCreator)) {
@@ -634,7 +633,7 @@ var Dinqyjs = (function() {
 				},
 
 				join: function() {
-					return _arrayPrototype.join.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.join.apply(this._, arguments);
 				},
 
 				keys: function() {
@@ -657,7 +656,7 @@ var Dinqyjs = (function() {
 				},
 
 				lastIndexOf: function() {
-					return _arrayPrototype.lastIndexOf.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.lastIndexOf.apply(this._, arguments);
 				},
 
 				lowerquartile: function(selector) {
@@ -665,7 +664,7 @@ var Dinqyjs = (function() {
 				},
 
 				map: function() {
-					var mapped = _arrayPrototype.map.apply(this._, arguments);
+					var mapped = ARRAY_PROTOTYPE.map.apply(this._, arguments);
 					return mapped ? _wrap(mapped) : void 0;
 				},
 
@@ -704,7 +703,7 @@ var Dinqyjs = (function() {
 
 				outerJoin: function(other, predicate, joinedObjectCreator) {
 					other = _unwrap(other);
-					if (!Array.isArray(other)) {
+					if (!ARRAY.isArray(other)) {
 						return this.clone();
 					}
 					if (!_isFunction(joinedObjectCreator)) {
@@ -758,11 +757,11 @@ var Dinqyjs = (function() {
 				},
 
 				pop: function() {
-					return _arrayPrototype.pop.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.pop.apply(this._, arguments);
 				},
 
 				push: function() {
-					return _arrayPrototype.push.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.push.apply(this._, arguments);
 				},
 
 				pushRepeatedly: function(element, times) {
@@ -790,11 +789,11 @@ var Dinqyjs = (function() {
 				},
 
 				reverse: function() {
-					return _wrap(_arrayPrototype.reverse.apply(this._, arguments));
+					return _wrap(ARRAY_PROTOTYPE.reverse.apply(this._, arguments));
 				},
 
 				shift: function() {
-					return _arrayPrototype.shift.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.shift.apply(this._, arguments);
 				},
 
 				shuffle: function() {
@@ -819,7 +818,7 @@ var Dinqyjs = (function() {
 				},
 
 				sort: function() {
-					_arrayPrototype.sort.apply(this._, arguments);
+					ARRAY_PROTOTYPE.sort.apply(this._, arguments);
 					return this;
 				},
 
@@ -834,17 +833,17 @@ var Dinqyjs = (function() {
 				},
 
 				toString: function() {
-					return _arrayPrototype.toString.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.toString.apply(this._, arguments);
 				},
 
 				union: function(other) {
 					var unioned = this.clone();
-					_arrayPrototype.push.apply(unioned.raw(), _unwrap(other));
+					ARRAY_PROTOTYPE.push.apply(unioned.raw(), _unwrap(other));
 					return unioned;
 				},
 
 				unshift: function() {
-					return _arrayPrototype.unshift.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.unshift.apply(this._, arguments);
 				},
 
 				upperquartile: function(selector) {
@@ -852,7 +851,7 @@ var Dinqyjs = (function() {
 				},
 
 				valueOf: function() {
-					return _arrayPrototype.valueOf.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.valueOf.apply(this._, arguments);
 				},
 
 				where: function(predicate) {
@@ -871,22 +870,22 @@ var Dinqyjs = (function() {
 			};
 
 			//Array polyfills:
-			if (!_arrayPrototype.indexOf) {
-				_arrayPrototype.indexOf = function (element, start) {
+			if (!ARRAY_PROTOTYPE.indexOf) {
+				ARRAY_PROTOTYPE.indexOf = function(element, start) {
 					return _firstIndex(this, _arrayElementCompare(element), 1, start);
 				};
 			}
 
-			if (!_arrayPrototype.lastIndexOf) {
-				_arrayPrototype.lastIndexOf = function(element, start) {
+			if (!ARRAY_PROTOTYPE.lastIndexOf) {
+				ARRAY_PROTOTYPE.lastIndexOf = function(element, start) {
 					return _firstIndex(this, _arrayElementCompare(element), -1, start);
 				};
 			}
 
-			if (!_arrayPrototype.map) {
-				_arrayPrototype.map = function(callback) {
+			if (!ARRAY_PROTOTYPE.map) {
+				ARRAY_PROTOTYPE.map = function(callback) {
 					var thisLength = this.length,
-						results = new Array(thisLength > _config.ARRAY_PREALLOCATION ?
+						results = new ARRAY(thisLength > _config.ARRAY_PREALLOCATION ?
 							0 :
 							thisLength),
 						i = 0;
@@ -902,8 +901,8 @@ var Dinqyjs = (function() {
 				};
 			}
 
-			if (!Array.isArray) {
-				Array.isArray = function(arg) {
+			if (!ARRAY.isArray) {
+				ARRAY.isArray = function(arg) {
 					return Object.prototype.toString.call(arg) == "[object Array]";
 				};
 			}
