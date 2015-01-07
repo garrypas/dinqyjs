@@ -213,7 +213,7 @@ var Dinqyjs = (function() {
 
 				//Set up a clone of the array
 				sorted = collection.raw().concat();
-				_sortAndThenSortMore(sorted, 1, selector);
+				_sortAndThenSortMore(sorted, selector);
 
 				quartilePosition = _minitabVariation(q, collectionLength);
 				lowerIndex = parseInt(quartilePosition);
@@ -231,35 +231,34 @@ var Dinqyjs = (function() {
 			},
 
 			_sortAndThenSortMore = function(array, selectors) {
-				var selectorsLength = selectors.length,
-					s,
+				var s,
 					result,
 					xSelected,
 					ySelected,
-					thisSelector,
-					direction;
+					direction,
+					thisSelector;
 
-				if (!selectors || selectorsLength < 1) {
+				if (_isUndefined(selectors) || selectors.length < 1) {
 					array.sort(_defaultSort);
 					return;
 				}
 
 				selectors = _isFunction(selectors) ?
-					selectors = [ selectors ] :
-					ARRAY_PROTOTYPE.slice.call(selectors);
+							[ selectors ] :
+							ARRAY_PROTOTYPE.slice.call(selectors);
 
 				array.sort(function(x, y) {
 					s = 0;
 					result = 0;
 
-					while (s < selectorsLength && result === 0) {
+					while (s < selectors.length && result === 0) {
 						thisSelector = selectors[s++];
 						if (!_isFunction(thisSelector)) {
 							continue;
 						}
 
 						direction = 0;
-						if (s < selectorsLength &&
+						if (s < selectors.length &&
 							typeof selectors[s] == "string" &&
 							selectors[s].indexOf("des") === 0
 						) {
@@ -277,7 +276,6 @@ var Dinqyjs = (function() {
 					return result;
 				});
 			},
-
 			_total = function(array, summingFunction, selector) {
 				var total = NULL,
 					i = array.length - 1,
@@ -413,8 +411,19 @@ var Dinqyjs = (function() {
 					return this._.indexOf(item) > -1;
 				},
 
-				count: function() {
-					return this._.length;
+				count: function(element) {
+					var i = 0,
+						arrayLength = this._.length,
+						count = 0;
+					if (_isUndefined(element)) {
+						return arrayLength;
+					}
+					while (i < arrayLength) {
+						if (this._[i++] === element) {
+							count++;
+						}
+					}
+					return count;
 				},
 
 				descending: function() {
@@ -429,8 +438,8 @@ var Dinqyjs = (function() {
 							.union(_differenceXY(other, thisUnwrapped, predicate));
 				},
 
-				distinct: function(predicate) {
-					var usePredicate = _isFunction(predicate),
+				distinct: function(selector) {
+					var usePredicate = _isFunction(selector),
 						distinct = [],
 						x,
 						y,
@@ -444,7 +453,7 @@ var Dinqyjs = (function() {
 							j = 0;
 							while (j < thisLength) {
 								y = this._[j];
-								if (usePredicate && predicate(x, y) || !usePredicate && x === y) {
+								if (usePredicate && selector(x, y) || !usePredicate && x === y) {
 									distinct.push(x);
 									break;
 								}
@@ -688,6 +697,34 @@ var Dinqyjs = (function() {
 
 				min: function(selector) {
 					return _getTop1(1, this._, selector);
+				},
+
+				mode: function(selector) {
+					var highestCount = 0,
+						highestElements = [],
+						lastElement,
+						currentCount,
+						selection,
+						i = 0,
+						element;
+
+					selection = (_isFunction(selector) ? this.map(selector) : this.clone())
+								.ascending()
+								.raw();
+
+					while (i < selection.length) {
+						element = selection[i++];
+						currentCount = (element === lastElement ? currentCount + 1 : 0);
+						if (currentCount === highestCount) {
+							highestElements.push(element);
+						} else if (currentCount > highestCount) {
+							highestElements = [element];
+							highestCount++;
+						}
+						lastElement = element;
+					}
+
+					return highestElements;
 				},
 
 				multiply: function(selector) {

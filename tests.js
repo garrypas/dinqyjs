@@ -194,6 +194,10 @@
 			expect(list.count()).toBe(list.count());
 		});
 
+		it("count() -> with element", function() {
+			expect(new Collection([1,2,3,3,4,5]).count(3)).toBe(2);
+		});
+
 		it("descending() -> sorts the list in descending order", function() {
 			var thisList = new Collection([3,1,2]);
 			thisList.descending();
@@ -865,6 +869,28 @@
 			expect(list.min(function(e) {
 				return e;
 			})).toBe(1);
+		});
+
+		it("mode() -> finds most occurances", function() {
+			var collection = new Collection( [ 1, 2, 2, 3 ] );
+			expect(collection.mode()).toEqual([2]);
+		});
+
+		it("mode() -> finds most occurances (with selector)", function() {
+			var collection = new Collection( [ { x: 1 }, { x: 2 }, { x: 2 }, { x: 3 } ] );
+			expect(collection.mode(function(element){
+				return element.x;
+			})).toEqual([2]);
+		});
+
+		it("mode() -> finds most occurances (with selector)", function() {
+			var collection = new Collection( [1,2,2,3,4,5,7] );
+			expect(collection.mode()).toEqual([2]);
+		});
+
+		it("mode() -> bimodal/multimodal when multiple", function() {
+			var collection = new Collection( [1,2,2,3,4,3,5,7,7] );
+			expect(collection.mode()).toEqual([2,3,7]);
 		});
 
 		it("multiply() -> no elements returns zero", function () {
