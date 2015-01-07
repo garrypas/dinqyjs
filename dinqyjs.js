@@ -150,17 +150,27 @@ var Dinqyjs = (function() {
 				};
 			},
 
+			_loop = function(array, callback, condition, returnOn) {
+				var i = 0;
+				while (i < array.length) {
+					if (condition(array[i], i) == returnOn) {
+						return;
+					}
+					callback(array[i], i++);
+				}
+			},
+
 			_minitabVariation = function(q, n) {
 				return 1 / 4 * (q * n + q);
 			},
 
 			_partition = function(array, keySelector, elementSelector, resultSelector) {
 				var i = 0,
-				thisElement,
-				partitions = [],
-				p,
-				useElementSelector = _isFunction(elementSelector),
-				useResultSelector = _isFunction(resultSelector);
+					thisElement,
+					partitions = [],
+					p,
+					useElementSelector = _isFunction(elementSelector),
+					useResultSelector = _isFunction(resultSelector);
 
 				while (i < array.length) {
 					thisElement = array[i++];
@@ -448,23 +458,11 @@ var Dinqyjs = (function() {
 				},
 
 				doUntil: function(callback, stoppingCondition) {
-					var i = 0;
-					while (i < this._.length) {
-						callback(this._[i]);
-						if (stoppingCondition(this._[++i])) {
-							return;
-						}
-					}
+					_loop(this._, callback, stoppingCondition, 1);
 				},
 
 				doWhile: function(callback, condition) {
-					var i = 0;
-					while (i < this._.length) {
-						if (!condition(this._[i], i)) {
-							return;
-						}
-						callback(this._[i], i++);
-					}
+					_loop(this._, callback, condition, 0);
 				},
 
 				each: function(callback) {
