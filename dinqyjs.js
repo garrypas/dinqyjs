@@ -1,315 +1,363 @@
 /*!Dinqyjs JavaScript Library v1.2.0
- * http://dinqyjs.com/
- *
- * Copyright (c) 2014 Garry Passarella
- * Released under the MIT license
- * http://dinqyjs.com/license
- *
- * Date: 2015-01-07
- */
+* http://dinqyjs.com/
+*
+* Copyright (c) 2014 Garry Passarella
+* Released under the MIT license
+* http://dinqyjs.com/license
+*
+* Date: 2015-01-07
+*/
 var Dinqyjs = (function() {
 	"use strict";
+
+	var NULL = null,
+	UNDEFINED = void 0,
+	TRUE = true,
+	FALSE = false,
+	ARRAY = Array,
+	ARRAY_PROTOTYPE = ARRAY.prototype,
+
+	_arrayElementCompare = function(element) {
+		return function(other) {
+			return element === other;
+		};
+	},
+
+	_arrayMidpoint = function(arrayLength, evenResolver) {
+		var index = arrayLength /  2;
+		return parseInt(evenResolver > 0 ? Math.ceil(index) : index);
+	},
+
+	_config = {
+		ARRAY_PREALLOCATION: 64000
+	},
+
+	_defaultSort = function(x, y) {
+		return x > y ? 1 : (x < y ? -1 : 0);
+	},
+
+	_differenceXY = function(inner, outer, predicate) {
+		var usePredicate = _isFunction(predicate),
+			i = 0,
+			j,
+			x,
+			y,
+			difference = [],
+			outerLength;
+
+		inner = _wrap(inner).distinct(predicate).raw();
+		outer = _unwrap(outer);
+
+		outerLength = outer.length;
+
+		while (i < inner.length) {
+			x = inner[i++];
+			j = 0;
+			while (j < outerLength)	{
+				y = outer[j];
+				if (usePredicate && predicate(x, y) || !usePredicate && x === y) {
+					break;
+				}
+				j++;
+			}
+			if (j === outerLength) {
+				difference.push(x);
+			}
+		}
+		return _wrap(difference);
+	},
+
+	_eachKeys = function(array, callback) {
+		var thisElement,
+			key;
+
+		for (key in array) {
+			thisElement = array[key];
+			if (!_isFunction(thisElement)) {
+				callback(thisElement, key);
+			}
+		}
+	},
+
+	_error = function(message) {
+		throw new Error(message);
+	},
+
+	_errorNoMatches = "Array contains no matching elements",
+	_errorNotExactlyOneMatch = "Array does not contain exactly one matching element",
+
+	_firstIndex = function(array, predicate, increments, startIndex, count) {
+		var thisElement,
+			thisLength = array.length;
+
+		increments = increments || 1;
+
+		if (!_isFunction(predicate)) {
+			return thisLength > 0 ? (increments > 0 ? 0 : thisLength - 1) : -1;
+		}
+
+		if (_isUndefined(startIndex)) {
+			startIndex = increments > 0 ? 0 : thisLength - 1;
+		}
+
+		if (_isUndefined(count) || count > thisLength) {
+			count = thisLength;
+		}
+
+		while (count > 0) {
+			thisElement = array[startIndex];
+			if (predicate(thisElement)) {
+				return startIndex;
+			}
+			startIndex += increments;
+			count--;
+		}
+		return -1;
+	},
+
+	_getTop1 = function(comparison, arr, selector) {
+		var thisLength = arr.length,
+			extreme = thisLength > 0 ? arr[0] : NULL,
+			thisElement,
+			i = 0,
+			useSelector = _isFunction(selector),
+			elementToCheckAgainst;
+
+		while (i < thisLength) {
+			thisElement = arr[i++];
+			elementToCheckAgainst = (useSelector ? selector(thisElement) : thisElement);
+			if (comparison ?
+				elementToCheckAgainst <= extreme :
+				elementToCheckAgainst >= extreme
+			) {
+				extreme = thisElement;
+			}
+		}
+		return extreme;
+	},
+
+	_isFunction = function(obj) {
+		return typeof obj == "function";
+	},
+
+	_isUndefined = function(obj) {
+		return obj === UNDEFINED;
+	},
+
+	_joinXY = function(innerElement, outerElement) {
+		return {
+			inner: innerElement,
+			outer: outerElement
+		};
+	},
+
+	_loop = function(array, callback, condition, returnOn) {
+		var i = 0;
+		while (i < array.length) {
+			if (condition(array[i], i) == returnOn) {
+				return;
+			}
+			callback(array[i], i++);
+		}
+	},
+
+	_minitabVariation = function(q, n) {
+		return 1 / 4 * (q * n + q);
+	},
+
+	_multiply = function(runningTotal, value) {
+		return runningTotal * value;
+	},
+
+	_partition = function(array, keySelector, elementSelector, resultSelector) {
+		var i = 0,
+			thisElement,
+			partitions = [],
+			p,
+			useElementSelector = _isFunction(elementSelector),
+			useResultSelector = _isFunction(resultSelector);
+
+		while (i < array.length) {
+			thisElement = array[i++];
+			p = keySelector(thisElement);
+			if (useElementSelector) {
+				thisElement = elementSelector(thisElement);
+			}
+
+			(partitions[p] = (p in partitions) ? partitions[p] : []).push(thisElement);
+		}
+
+		if (useResultSelector) {
+			_useResultSelectorOnGroup(partitions, resultSelector);
+		}
+
+		return partitions;
+	},
+
+	//This uses the minitab method to get quartiles
+	_quartile = function(collection, q, selector) {
+		var useSelector = _isFunction(selector),
+			sorted,
+			quartilePosition,
+			lowerIndex,
+			upperIndex,
+			lowerElement,
+			upperElement,
+			lowerValue,
+			upperValue,
+			collectionLength = collection.count();
+
+		if (collectionLength < 1) {
+			return UNDEFINED;
+		}
+
+		//Set up a clone of the array
+		sorted = collection.raw().concat();
+		_sortAndThenSortMore(sorted, selector);
+
+		quartilePosition = _minitabVariation(q, collectionLength);
+		lowerIndex = parseInt(quartilePosition);
+		upperIndex = parseInt(Math.ceil(quartilePosition));
+		lowerValue = sorted[lowerIndex - 1];
+		upperValue = sorted[upperIndex - 1];
+		lowerElement = useSelector ? selector(lowerValue) : lowerValue;
+		upperElement = useSelector ? selector(upperValue) : upperValue;
+
+		return upperIndex > lowerIndex ? lowerElement : (lowerElement + upperElement) / 2;
+	},
+
+	_randomForSorting = function() {
+		return Math.random() - 0.5;
+	},
+
+	_sortAndThenSortMore = function(array, selectors) {
+		if (_isUndefined(selectors) || selectors.length < 1) {
+			array.sort(_defaultSort);
+			return;
+		}
+
+		selectors = _isFunction(selectors) ?
+					[ selectors ] :
+					ARRAY_PROTOTYPE.slice.call(selectors);
+
+
+		array.sort(_sorterWithSelectors(selectors));
+	},
+
+	_sorterWithSelectors = function (selectors) {
+		return function(x, y) {
+			var s = 0,
+				result = 0,
+				xSelected,
+				ySelected,
+				direction,
+				thisSelector,
+				selectorsLength = selectors.length;
+
+			while (s < selectorsLength && result === 0) {
+				thisSelector = selectors[s++];
+				if (!_isFunction(thisSelector)) {
+					continue;
+				}
+
+				direction = 0;
+				if (s < selectorsLength &&
+					typeof selectors[s] == "string" &&
+					selectors[s].indexOf("des") === 0
+				) {
+					direction = 1;
+				}
+
+				xSelected = thisSelector(x);
+				ySelected = thisSelector(y);
+				if (xSelected < ySelected) {
+					result = direction ? 1 : -1;
+				} else if (xSelected > ySelected) {
+					result = direction ? -1 : 1;
+				}
+			}
+			return result;
+		};
+	},
+
+	_total = function(array, summingFunction, selector) {
+		var total = NULL,
+			i = array.length - 1,
+			thisElement,
+			usePredicate = _isFunction(selector),
+			toAdd;
+
+		while (i >= 0) {
+			thisElement = array[i--];
+			toAdd = usePredicate ? selector(thisElement) : thisElement;
+			total = (total === NULL ? toAdd : summingFunction(total, toAdd));
+		}
+		return total;
+	},
+
+	_unwrap = function(Collection) {
+		return Collection._ || Collection;
+	},
+
+	_useResultSelectorOnGroup = function(array, resultSelector) {
+		var key,
+			thisElement;
+
+		for (key in array) {
+			thisElement = array[key];
+			array[key] = resultSelector(thisElement, key);
+		}
+
+		return array;
+	},
+
+	_wrap = function(array) {
+		return array._ ?  array : new Dinqyjs.Collection(array);
+	};
+
+	//Array polyfills:
+	if (!ARRAY_PROTOTYPE.indexOf) {
+		ARRAY_PROTOTYPE.indexOf = function(element, start) {
+			return _firstIndex(this, _arrayElementCompare(element), 1, start);
+		};
+	}
+
+	if (!ARRAY_PROTOTYPE.lastIndexOf) {
+		ARRAY_PROTOTYPE.lastIndexOf = function(element, start) {
+			return _firstIndex(this, _arrayElementCompare(element), -1, start);
+		};
+	}
+
+	if (!ARRAY_PROTOTYPE.map) {
+		ARRAY_PROTOTYPE.map = function(callback) {
+			var thisLength = this.length,
+				results = new ARRAY(thisLength > _config.ARRAY_PREALLOCATION ?
+				0 :
+				thisLength),
+				i = 0;
+
+			if (!_isFunction(callback)) {
+				return UNDEFINED;
+			}
+
+			while (i < thisLength) {
+				results[i] = callback(this[i++]);
+			}
+			return results;
+		};
+	}
+
+	if (!ARRAY.isArray) {
+		ARRAY.isArray = function(arg) {
+			return Object.prototype.toString.call(arg) == "[object Array]";
+		};
+	}
+
 	return {
-		Collection: (function() {
-		    function Collection(array) {
+		Collection : (function() {
+			function Collection(array) {
 				this._ = array || [];
-		    }
-
-			var _config = {
-				ARRAY_PREALLOCATION: 64000
-			},
-
-			NULL = null,
-			TRUE = true,
-			FALSE = false,
-			ARRAY = Array,
-			ARRAY_PROTOTYPE = ARRAY.prototype,
-
-			_arrayElementCompare = function(element) {
-				return function(other) {
-					return element === other;
-				};
-			},
-
-			_arrayMidpoint = function(arrayLength, evenResolver) {
-				var thisLength = arrayLength,
-				index = thisLength /  2;
-				return parseInt(evenResolver > 0 ? Math.ceil(index) : index);
-			},
-
-			_defaultSort = function(x, y) {
-				return x > y ? 1 : (x < y ? -1 : 0);
-			},
-
-			_differenceXY = function(inner, outer, predicate) {
-				var usePredicate = _isFunction(predicate),
-					i = 0,
-					j,
-					x,
-					y,
-					difference = [],
-					outerLength;
-
-				inner = _wrap(inner).distinct(predicate).raw();
-				outer = _unwrap(outer);
-
-				outerLength = outer.length;
-
-				while (i < inner.length) {
-					x = inner[i++];
-					j = 0;
-					while (j < outerLength)	{
-						y = outer[j];
-						if (usePredicate && predicate(x, y) || !usePredicate && x === y) {
-							break;
-						}
-						j++;
-					}
-					if (j === outerLength) {
-						difference.push(x);
-					}
-				}
-				return _wrap(difference);
-			},
-
-			_eachKeys = function(array, callback) {
-				var thisElement,
-					key;
-				for (key in array) {
-					thisElement = array[key];
-					if (!_isFunction(thisElement)) {
-						callback(thisElement, key);
-					}
-				}
-			},
-
-			_errorNoMatches = "Array contains no matching elements",
-			_errorNotExactlyOneMatch = "Array does not contain exactly one matching element",
-
-			_firstIndex = function(array, predicate, increments, startIndex, count) {
-				var thisElement,
-					thisLength = array.length;
-
-				increments = increments || 1;
-
-				if (!_isFunction(predicate)) {
-					return thisLength > 0 ? (increments > 0 ? 0 : thisLength - 1) : -1;
-				}
-
-				if (_isUndefined(startIndex)) {
-					startIndex = increments > 0 ? 0 : thisLength - 1;
-				}
-
-				if (_isUndefined(count) || count > thisLength) {
-					count = thisLength;
-				}
-
-				while (count > 0) {
-					thisElement = array[startIndex];
-					if (predicate(thisElement)) {
-						return startIndex;
-					}
-					startIndex += increments;
-					count--;
-				}
-				return -1;
-			},
-
-			_getTop1 = function(comparison, arr, selector) {
-				var thisLength = arr.length,
-					extreme = thisLength > 0 ? arr[0] : NULL,
-					thisElement,
-					i = 0,
-					useSelector = _isFunction(selector),
-					elementToCheckAgainst;
-
-				while (i < thisLength) {
-					thisElement = arr[i++];
-					elementToCheckAgainst = (useSelector ? selector(thisElement) : thisElement);
-					if (comparison ?
-						elementToCheckAgainst <= extreme :
-						elementToCheckAgainst >= extreme
-					) {
-						extreme = thisElement;
-					}
-				}
-				return extreme;
-			},
-
-			_isFunction = function(obj) {
-				return typeof obj == "function";
-			},
-
-			_isUndefined = function(obj) {
-				return obj === void 0;
-			},
-
-			_joinXY = function(innerElement, outerElement) {
-				return {
-					inner: innerElement,
-					outer: outerElement
-				};
-			},
-
-			_loop = function(array, callback, condition, returnOn) {
-				var i = 0;
-				while (i < array.length) {
-					if (condition(array[i], i) == returnOn) {
-						return;
-					}
-					callback(array[i], i++);
-				}
-			},
-
-			_minitabVariation = function(q, n) {
-				return 1 / 4 * (q * n + q);
-			},
-
-			_multiply = function(runningTotal, value) {
-				return runningTotal * value;
-			},
-
-			_partition = function(array, keySelector, elementSelector, resultSelector) {
-				var i = 0,
-					thisElement,
-					partitions = [],
-					p,
-					useElementSelector = _isFunction(elementSelector),
-					useResultSelector = _isFunction(resultSelector);
-
-				while (i < array.length) {
-					thisElement = array[i++];
-					p = keySelector(thisElement);
-					if (useElementSelector) {
-						thisElement = elementSelector(thisElement);
-					}
-
-					(partitions[p] = (p in partitions) ? partitions[p] : []).push(thisElement);
-				}
-
-				if (useResultSelector) {
-					_useResultSelectorOnGroup(partitions, resultSelector);
-				}
-
-				return partitions;
-			},
-
-			//This uses the minitab method to get quartiles
-			_quartile = function(collection, q, selector) {
-				var useSelector = _isFunction(selector),
-					sorted,
-					quartilePosition,
-					lowerIndex,
-					upperIndex,
-					lowerElement,
-					upperElement,
-					lowerValue,
-					upperValue,
-					collectionLength = collection.count();
-
-				if (collectionLength < 1) {
-					return void 0;
-				}
-
-				//Set up a clone of the array
-				sorted = collection.raw().concat();
-				_sortAndThenSortMore(sorted, selector);
-
-				quartilePosition = _minitabVariation(q, collectionLength);
-				lowerIndex = parseInt(quartilePosition);
-				upperIndex = parseInt(Math.ceil(quartilePosition));
-				lowerValue = sorted[lowerIndex - 1];
-				upperValue = sorted[upperIndex - 1];
-				lowerElement = useSelector ? selector(lowerValue) : lowerValue;
-				upperElement = useSelector ? selector(upperValue) : upperValue;
-
-				return upperIndex > lowerIndex ? lowerElement : (lowerElement + upperElement) / 2;
-			},
-
-			_randomForSorting = function() {
-				return Math.random() - 0.5;
-			},
-
-			_sortAndThenSortMore = function(array, selectors) {
-				var s,
-					result,
-					xSelected,
-					ySelected,
-					direction,
-					thisSelector;
-
-				if (_isUndefined(selectors) || selectors.length < 1) {
-					array.sort(_defaultSort);
-					return;
-				}
-
-				selectors = _isFunction(selectors) ?
-							[ selectors ] :
-							ARRAY_PROTOTYPE.slice.call(selectors);
-
-				array.sort(function(x, y) {
-					s = 0;
-					result = 0;
-
-					while (s < selectors.length && result === 0) {
-						thisSelector = selectors[s++];
-						if (!_isFunction(thisSelector)) {
-							continue;
-						}
-
-						direction = 0;
-						if (s < selectors.length &&
-							typeof selectors[s] == "string" &&
-							selectors[s].indexOf("des") === 0
-						) {
-							direction = 1;
-						}
-
-						xSelected = thisSelector(x);
-						ySelected = thisSelector(y);
-						if (xSelected < ySelected) {
-							result = direction ? 1 : -1;
-						} else if (xSelected > ySelected) {
-							result = direction ? -1 : 1;
-						}
-					}
-					return result;
-				});
-			},
-			_total = function(array, summingFunction, selector) {
-				var total = NULL,
-					i = array.length - 1,
-					thisElement,
-					usePredicate = _isFunction(selector),
-					toAdd;
-
-				while (i >= 0) {
-					thisElement = array[i--];
-					toAdd = usePredicate ? selector(thisElement) : thisElement;
-					total = (total === NULL ? toAdd : summingFunction(total, toAdd));
-				}
-				return total;
-			},
-
-			_unwrap = function(Collection) {
-				return Collection._ || Collection;
-			},
-
-			_useResultSelectorOnGroup = function(array, resultSelector) {
-				var key,
-					thisElement;
-
-				for (key in array) {
-					thisElement = array[key];
-					array[key] = resultSelector(thisElement, key);
-				}
-
-				return array;
-			},
-
-			_wrap = function(array) {
-				return array._ ?  array : new Collection(array);
-			};
+			}
 
 			Collection.associative = function(object) {
 				for (var i in object) {
@@ -413,8 +461,8 @@ var Dinqyjs = (function() {
 
 				count: function(element) {
 					var i = 0,
-						arrayLength = this._.length,
-						count = 0;
+					arrayLength = this._.length,
+					count = 0;
 					if (_isUndefined(element)) {
 						return arrayLength;
 					}
@@ -475,7 +523,7 @@ var Dinqyjs = (function() {
 				each: function(callback) {
 					var i = 0,
 						thisLength = this._.length;
-					//Touch the first element to see if this an associative array:
+
 					if (thisLength === +thisLength && !Collection.associative(this._)) {
 						while (i < thisLength) {
 							callback(this._[i], i++);
@@ -530,13 +578,14 @@ var Dinqyjs = (function() {
 					if (firstIndex >= 0) {
 						return this._[firstIndex];
 					}
-					throw new Error(_errorNoMatches);
+					_error(_errorNoMatches);
 				},
 
 				flatten: function() {
 					var i = 0,
 						flattened = _wrap([]),
 						thisElement;
+
 					while (i < this._.length) {
 						thisElement = this._[i++];
 						Collection.prototype.push.apply(
@@ -550,11 +599,12 @@ var Dinqyjs = (function() {
 
 				groupBy: function(keySelector, elementSelector, resultSelector) {
 					var partition = _partition(this._,
-										keySelector,
-										elementSelector,
-										resultSelector),
+						keySelector,
+						elementSelector,
+						resultSelector),
 						key;
-					this._.splice(0, this._.length);
+						this._.splice(0, this._.length);
+
 					for (key in partition) {
 						this._[key] = partition[key];
 					}
@@ -570,12 +620,15 @@ var Dinqyjs = (function() {
 				},
 
 				insertRange: function(index, elements) {
-					var args = [ index, 0 ].concat(
-						arguments.length < 3 ?
-						_unwrap(elements) :
-						ARRAY_PROTOTYPE.slice.call(arguments, 1)
-					);
-					ARRAY_PROTOTYPE.splice.apply(this._, args);
+					ARRAY_PROTOTYPE
+						.splice
+						.apply(this._,
+							[ index, 0 ].concat(
+								arguments.length < 3 ?
+								_unwrap(elements) :
+								ARRAY_PROTOTYPE.slice.call(arguments, 1)
+							)
+						);
 				},
 
 				intersect: function(other, predicate) {
@@ -656,7 +709,7 @@ var Dinqyjs = (function() {
 					if (firstIndex >= 0) {
 						return this._[firstIndex];
 					}
-					throw new Error(_errorNoMatches);
+					_error(_errorNoMatches);
 				},
 
 				lastIndexOf: function() {
@@ -669,7 +722,7 @@ var Dinqyjs = (function() {
 
 				map: function() {
 					var mapped = ARRAY_PROTOTYPE.map.apply(this._, arguments);
-					return mapped ? _wrap(mapped) : void 0;
+					return mapped ? _wrap(mapped) : UNDEFINED;
 				},
 
 				max: function(selector) {
@@ -678,8 +731,8 @@ var Dinqyjs = (function() {
 
 				median: function(/*selector*/) {
 					var middleFloor,
-					middleCeil,
-					sorted;
+						middleCeil,
+						sorted;
 
 					sorted = this.clone();
 					_sortAndThenSortMore(sorted.raw(), arguments);
@@ -687,8 +740,8 @@ var Dinqyjs = (function() {
 					middleCeil = sorted.middle(1);
 
 					return middleFloor < middleCeil ?
-					((middleFloor + middleCeil) * 0.5) :
-					middleFloor;
+							((middleFloor + middleCeil) / 2) :
+							middleFloor;
 				},
 
 				middle: function(evenResolver) {
@@ -709,8 +762,8 @@ var Dinqyjs = (function() {
 						element;
 
 					selection = (_isFunction(selector) ? this.map(selector) : this.clone())
-								.ascending()
-								.raw();
+					.ascending()
+					.raw();
 
 					while (i < selection.length) {
 						element = selection[i++];
@@ -732,14 +785,6 @@ var Dinqyjs = (function() {
 				},
 
 				outerJoin: function(other, predicate, joinedObjectCreator) {
-					other = _unwrap(other);
-					if (!ARRAY.isArray(other)) {
-						return this.clone();
-					}
-					if (!_isFunction(joinedObjectCreator)) {
-						joinedObjectCreator = _joinXY;
-					}
-
 					var joined = [],
 						innerElement,
 						outerElement,
@@ -747,6 +792,14 @@ var Dinqyjs = (function() {
 						i = 0,
 						j,
 						usePredicate = _isFunction(predicate);
+
+					other = _unwrap(other);
+					if (!ARRAY.isArray(other)) {
+						return this.clone();
+					}
+					if (!_isFunction(joinedObjectCreator)) {
+						joinedObjectCreator = _joinXY;
+					}
 
 					while (i < this._.length) {
 						innerElement = this._[i++];
@@ -838,7 +891,7 @@ var Dinqyjs = (function() {
 					}
 
 					if (matches.length != 1) {
-						throw new Error(_errorNotExactlyOneMatch);
+						_error(_errorNotExactlyOneMatch);
 					}
 					return matches[0];
 				},
@@ -863,7 +916,7 @@ var Dinqyjs = (function() {
 				},
 
 				toString: function() {
-					return ARRAY_PROTOTYPE.toString.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.toString.apply(this._);
 				},
 
 				union: function(other) {
@@ -899,50 +952,12 @@ var Dinqyjs = (function() {
 				}
 			};
 
-			//Array polyfills:
-			if (!ARRAY_PROTOTYPE.indexOf) {
-				ARRAY_PROTOTYPE.indexOf = function(element, start) {
-					return _firstIndex(this, _arrayElementCompare(element), 1, start);
-				};
-			}
-
-			if (!ARRAY_PROTOTYPE.lastIndexOf) {
-				ARRAY_PROTOTYPE.lastIndexOf = function(element, start) {
-					return _firstIndex(this, _arrayElementCompare(element), -1, start);
-				};
-			}
-
-			if (!ARRAY_PROTOTYPE.map) {
-				ARRAY_PROTOTYPE.map = function(callback) {
-					var thisLength = this.length,
-						results = new ARRAY(thisLength > _config.ARRAY_PREALLOCATION ?
-							0 :
-							thisLength),
-						i = 0;
-
-					if (!_isFunction(callback)) {
-						return void 0;
-					}
-
-					while (i < thisLength) {
-						results[i] = callback(this[i++]);
-					}
-					return results;
-				};
-			}
-
-			if (!ARRAY.isArray) {
-				ARRAY.isArray = function(arg) {
-					return Object.prototype.toString.call(arg) == "[object Array]";
-				};
-			}
-
-		    return Collection;
+			return Collection;
 
 		}())
 	};
 }());
 //For node.js
 if (typeof exports === "object" && exports) {
-  exports.Dinqyjs = Dinqyjs;
+	exports.Dinqyjs = Dinqyjs;
 }

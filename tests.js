@@ -1269,6 +1269,12 @@
 			expect(selection).toEqual([ 6,7,8,9,10 ]);
 		});
 
+		it("valueOf() -> behaves as Array.valueOf()", function() {
+			var collectionValueOf = list.valueOf();
+			var arrayValueOf = list.raw().valueOf();
+			expect(collectionValueOf).toEqual(arrayValueOf);
+		});
+
 		it("zip() -> zips", function() {
 			var zip = Collection.zip([1],[2,4],[3,5,6,7]).raw();
 			expect(zip[0]).toEqual([1,2,3]);
