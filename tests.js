@@ -356,6 +356,13 @@
 			expect(list.element(1)).toBe(99);
 		});
 
+		it("element() -> sets element by key", function() {
+			var array = [];
+			array[ "key" ] = 99;
+			new Collection(array).element("key", 100);
+			expect(new Collection(array).element('key')).toBe(100);
+		});
+
 		it("element() -> returns newly set element", function() {
 			expect(new Collection([1,2,3]).element(1, 99)).toBe(99);
 		});
@@ -909,7 +916,7 @@
 
 		it("orderBy() -> uses sort ascending then descending", function() {
 			var thisList = new Collection([{x : 1, y : 2}, {x : 1, y : 3}, {x : 1, y : 1}, {x : 2, y : 3}, {x : 2, y : 1}]);
-			thisList.ascending(function(element){
+			thisList.orderBy(function(element){
 				return element.x;
 			}, 'asc',
 			function(element) {
@@ -929,7 +936,7 @@
 
 		it("orderBy() -> uses ascending by default", function() {
 			var thisList = new Collection([{x : 1, y : 2}, {x : 1, y : 3}, {x : 1, y : 1}, {x : 2, y : 3}, {x : 2, y : 1}]);
-			thisList.ascending(function(element){
+			thisList.orderBy(function(element){
 				return element.x;
 			},
 			function(element) {
@@ -1229,6 +1236,14 @@
 			expect(array.toString()).toBe('1,2,3');
 		});
 
+		it("transpose() -> zips", function() {
+			var transpose = Collection.transpose([1],[2,4],[3,5,6,7]).raw();
+			expect(transpose[0]).toEqual([1,2,3]);
+			expect(transpose[1]).toEqual([4,5]);
+			expect(transpose[2]).toEqual([6]);
+			expect(transpose[3]).toEqual([7]);
+		});
+
 		it("union() -> unions two lists", function () {
 			expect(new Collection([1,2]).union([3,4]).raw()).toEqual([1,2,3,4]);
 		});
@@ -1273,13 +1288,5 @@
 			var collectionValueOf = list.valueOf();
 			var arrayValueOf = list.raw().valueOf();
 			expect(collectionValueOf).toEqual(arrayValueOf);
-		});
-
-		it("zip() -> zips", function() {
-			var zip = Collection.zip([1],[2,4],[3,5,6,7]).raw();
-			expect(zip[0]).toEqual([1,2,3]);
-			expect(zip[1]).toEqual([4,5]);
-			expect(zip[2]).toEqual([6]);
-			expect(zip[3]).toEqual([7]);
 		});
 	});

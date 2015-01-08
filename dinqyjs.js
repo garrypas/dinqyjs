@@ -1,4 +1,4 @@
-/*!Dinqyjs JavaScript Library v1.3.0
+/*!Dinqyjs JavaScript Library v1.3.1
 * http://dinqyjs.com/
 *
 * Copyright (c) 2014 Garry Passarella
@@ -372,7 +372,7 @@ var Dinqyjs = (function() {
 				return _config[key] = (arguments.length < 2 ? _config[key] : value);
 			};
 
-			Collection.zip = function(/*collections or arrays*/) {
+			Collection.transpose = function(/*collections or arrays*/) {
 				var i = 0,
 					a,
 					args = arguments,
@@ -416,10 +416,6 @@ var Dinqyjs = (function() {
 				ascending: function(/*selectors*/) {
 					_sortAndThenSortMore(this._, arguments);
 					return this;
-				},
-
-				orderBy: function(/*selectors*/) {
-					_sortAndThenSortMore(this._, arguments);
 				},
 
 				atRandom: function() {
@@ -615,6 +611,34 @@ var Dinqyjs = (function() {
 					return ARRAY_PROTOTYPE.indexOf.apply(this._, arguments);
 				},
 
+				innerJoin: function(other, predicate, joinedObjectCreator) {
+					other = _unwrap(other);
+					if (!ARRAY.isArray(other)) {
+						return this.clone();
+					}
+					if (!_isFunction(joinedObjectCreator)) {
+						joinedObjectCreator = _joinXY;
+					}
+
+					var joined = [],
+					innerElement,
+					outerElement,
+					i = 0,
+					j;
+
+					while (i < this._.length) {
+						innerElement = this._[i++];
+						j = 0;
+						while (j < other.length) {
+							outerElement = other[j++];
+							if (predicate(innerElement, outerElement)) {
+								joined.push(joinedObjectCreator(innerElement, outerElement));
+							}
+						}
+					}
+					return _wrap(joined);
+				},
+
 				insert: function(index, element) {
 					this._.splice(index, 0, element);
 				},
@@ -629,6 +653,10 @@ var Dinqyjs = (function() {
 								ARRAY_PROTOTYPE.slice.call(arguments, 1)
 							)
 						);
+				},
+
+				interquartileRange: function(selector) {
+					return this.upperquartile(selector) - this.lowerquartile(selector);
 				},
 
 				intersect: function(other, predicate) {
@@ -655,38 +683,6 @@ var Dinqyjs = (function() {
 						}
 					}
 					return _wrap(intersection);
-				},
-
-				innerJoin: function(other, predicate, joinedObjectCreator) {
-					other = _unwrap(other);
-					if (!ARRAY.isArray(other)) {
-						return this.clone();
-					}
-					if (!_isFunction(joinedObjectCreator)) {
-						joinedObjectCreator = _joinXY;
-					}
-
-					var joined = [],
-						innerElement,
-						outerElement,
-						i = 0,
-						j;
-
-					while (i < this._.length) {
-						innerElement = this._[i++];
-						j = 0;
-						while (j < other.length) {
-							outerElement = other[j++];
-							if (predicate(innerElement, outerElement)) {
-								joined.push(joinedObjectCreator(innerElement, outerElement));
-							}
-						}
-					}
-					return _wrap(joined);
-				},
-
-				interquartileRange: function(selector) {
-					return this.upperquartile(selector) - this.lowerquartile(selector);
 				},
 
 				join: function() {
@@ -782,6 +778,10 @@ var Dinqyjs = (function() {
 
 				multiply: function(selector) {
 					return this._.length > 0 ? _total(this._, _multiply, selector) : 0;
+				},
+
+				orderBy: function(/*selectors*/) {
+					_sortAndThenSortMore(this._, arguments);
 				},
 
 				outerJoin: function(other, predicate, joinedObjectCreator) {
