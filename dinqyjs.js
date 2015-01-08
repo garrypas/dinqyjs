@@ -262,7 +262,7 @@ var Dinqyjs = (function() {
 							typeof selectors[s] == "string" &&
 							selectors[s].indexOf("des") === 0
 						) {
-								direction = 1;
+							direction = 1;
 						}
 
 						xSelected = thisSelector(x);
