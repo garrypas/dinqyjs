@@ -1,11 +1,11 @@
-/*!Dinqyjs JavaScript Library v1.3.1
+/*!Dinqyjs JavaScript Library v1.3.2
 * http://dinqyjs.com/
 *
 * Copyright (c) 2014 Garry Passarella
 * Released under the MIT license
 * http://dinqyjs.com/license
 *
-* Date: 2015-01-08
+* Date: 2015-01-10
 */
 var Dinqyjs = (function() {
 	"use strict";
@@ -116,15 +116,12 @@ var Dinqyjs = (function() {
 	},
 
 	_getTop1 = function(comparison, arr, selector) {
-		var thisLength = arr.length,
-			extreme = thisLength > 0 ? arr[0] : NULL,
-			thisElement,
-			i = 0,
+		var	thisElement,
 			useSelector = _isFunction(selector),
 			elementToCheckAgainst;
 
-		while (i < thisLength) {
-			thisElement = arr[i++];
+		for(var i = 0, thisLength = arr.length, extreme = thisLength > 0 ? arr[0] : NULL; i < thisLength; i++) {
+			thisElement = arr[i];
 			elementToCheckAgainst = (useSelector ? selector(thisElement) : thisElement);
 			if (comparison ?
 				elementToCheckAgainst <= extreme :
@@ -152,12 +149,8 @@ var Dinqyjs = (function() {
 	},
 
 	_loop = function(array, callback, condition, returnOn) {
-		var i = 0;
-		while (i < array.length) {
-			if (condition(array[i], i) == returnOn) {
-				return;
-			}
-			callback(array[i], i++);
+		for (var i = 0; i < array.length && condition(array[i], i) != returnOn; i++) {
+			callback(array[i], i);
 		}
 	},
 
@@ -373,16 +366,14 @@ var Dinqyjs = (function() {
 			};
 
 			Collection.transpose = function(/*collections or arrays*/) {
-				var i = 0,
-					a,
+				var	a,
 					args = arguments,
-					argsLength = arguments.length,
 					thisArray,
 					thisArrayLength,
 					results = [];
 
-				while (i < argsLength) {
-					thisArray = _unwrap(args[i++]);
+				for(var i = 0, argsLength = arguments.length; i < argsLength; i++) {
+					thisArray = _unwrap(args[i]);
 					thisArrayLength = thisArray.length;
 
 					while (results.length < thisArrayLength) {
@@ -487,12 +478,10 @@ var Dinqyjs = (function() {
 						distinct = [],
 						x,
 						y,
-						i = 0,
-						j,
-						thisLength = this._.length;
+						j;
 
-					while (i < thisLength) {
-						x = this._[i++];
+					for(var i = 0, thisLength = this._.length; i < thisLength; i++) {
+						x = this._[i];
 						if (distinct.indexOf(x) == -1) {
 							j = 0;
 							while (j < thisLength) {

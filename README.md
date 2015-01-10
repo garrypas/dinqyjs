@@ -5,7 +5,7 @@
 Powerful
 --------
 
-Over 50 functions.
+Over 60 functions.
 
 Tiny
 ----
