@@ -1,4 +1,4 @@
-/*!Dinqyjs JavaScript Library v1.3.3
+/*!Dinqyjs JavaScript Library v1.3.4
 * http://dinqyjs.com/
 *
 * Copyright (c) 2014 Garry Passarella
@@ -705,9 +705,15 @@ var Dinqyjs = (function() {
 					return _quartile(this, 1, selector);
 				},
 
-				map: function() {
-					var mapped = ARRAY_PROTOTYPE.map.apply(this._, arguments);
-					return mapped ? _wrap(mapped) : UNDEFINED;
+				map: function(selector) {
+					if (_isFunction(selector)) {
+						var results = [];
+						this.each(function (e) {
+							results.push(selector(e));
+						});
+						return _wrap(results);
+					}
+					return void 0;
 				},
 
 				max: function(selector) {
