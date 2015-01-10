@@ -349,7 +349,7 @@ var Dinqyjs = (function() {
 
 	if (!ARRAY.isArray) {
 		ARRAY.isArray = function(arg) {
-			return Object.prototype.toString.call(arg) == "[object Array]";
+			return arg.constructor === ARRAY;
 		};
 	}
 
