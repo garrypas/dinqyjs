@@ -19,9 +19,12 @@ var Dinqyjs = (function() {
 	LENGTH = "length",
 	APPLY = "apply",
 	PUSH = "push",
+	REVERSE = "reverse",
 	SLICE = "slice",
+	SORT = "sort",
 	SPLICE = "splice",
 	INDEXOF = "indexOf",
+	LASTINDEXOF = "lastIndexOf",
 
 	_arrayElementCompare = function(element) {
 		return function(other) {
@@ -51,7 +54,7 @@ var Dinqyjs = (function() {
 			difference = [],
 			outerLength;
 
-		inner = _wrap(inner).distinct(predicate).raw();
+		inner = _unwrap(_wrap(inner).distinct(predicate));
 		outer = _unwrap(outer);
 
 		outerLength = outer[LENGTH];
@@ -211,7 +214,7 @@ var Dinqyjs = (function() {
 		}
 
 		//Set up a clone of the array
-		sorted = collection.raw().concat();
+		sorted = _unwrap(collection).concat();
 		_sortAndThenSortMore(sorted, selector);
 
 		quartilePosition = _minitabVariation(q, collectionLength);
@@ -231,7 +234,7 @@ var Dinqyjs = (function() {
 
 	_sortAndThenSortMore = function(array, selectors) {
 		if (_isUndefined(selectors) || selectors[LENGTH] < 1) {
-			array.sort(_defaultSort);
+			array[SORT](_defaultSort);
 			return;
 		}
 
@@ -240,7 +243,7 @@ var Dinqyjs = (function() {
 					ARRAY_PROTOTYPE.slice.call(selectors);
 
 
-		array.sort(_sorterWithSelectors(selectors));
+		array[SORT](_sorterWithSelectors(selectors));
 	},
 
 	_sorterWithSelectors = function (selectors) {
@@ -321,8 +324,8 @@ var Dinqyjs = (function() {
 		};
 	}
 
-	if (!ARRAY_PROTOTYPE.lastIndexOf) {
-		ARRAY_PROTOTYPE.lastIndexOf = function(element, start) {
+	if (!ARRAY_PROTOTYPE[LASTINDEXOF]) {
+		ARRAY_PROTOTYPE[LASTINDEXOF] = function(element, start) {
 			return _firstIndex(this, _arrayElementCompare(element), -1, start);
 		};
 	}
@@ -469,7 +472,7 @@ var Dinqyjs = (function() {
 
 				descending: function() {
 					_sortAndThenSortMore(this._, arguments);
-					return this.reverse();
+					return this[REVERSE]();
 				},
 
 				difference: function(other, predicate) {
@@ -579,7 +582,7 @@ var Dinqyjs = (function() {
 
 					while (i < this._[LENGTH]) {
 						thisElement = this._[i++];
-						Collection.prototype.push[APPLY](
+						Collection.prototype[PUSH][APPLY](
 							flattened, ARRAY.isArray(thisElement) ?
 							thisElement :
 							[ thisElement ]
@@ -659,8 +662,8 @@ var Dinqyjs = (function() {
 						y,
 						i = 0,
 						j,
-						thisDistinct = this.distinct(predicate).raw(),
-						otherDistinct = _wrap(other).distinct(predicate).raw();
+						thisDistinct = _unwrap(this.distinct(predicate)),
+						otherDistinct = _unwrap(_wrap(other).distinct(predicate));
 
 					while (i < thisDistinct[LENGTH]) {
 						x = thisDistinct[i++];
@@ -702,7 +705,7 @@ var Dinqyjs = (function() {
 				},
 
 				lastIndexOf: function() {
-					return ARRAY_PROTOTYPE.lastIndexOf[APPLY](this._, arguments);
+					return ARRAY_PROTOTYPE[LASTINDEXOF][APPLY](this._, arguments);
 				},
 
 				lowerquartile: function(selector) {
@@ -730,7 +733,7 @@ var Dinqyjs = (function() {
 						sorted;
 
 					sorted = this.clone();
-					_sortAndThenSortMore(sorted.raw(), arguments);
+					_sortAndThenSortMore(_unwrap(sorted), arguments);
 					middleFloor = sorted.middle();
 					middleCeil = sorted.middle(1);
 
@@ -756,9 +759,8 @@ var Dinqyjs = (function() {
 						i = 0,
 						element;
 
-					selection = (_isFunction(selector) ? this.map(selector) : this.clone())
-					.ascending()
-					.raw();
+					selection = _unwrap((_isFunction(selector) ? this.map(selector) : this.clone())
+					.ascending());
 
 					while (i < selection[LENGTH]) {
 						element = selection[i++];
@@ -870,7 +872,7 @@ var Dinqyjs = (function() {
 				},
 
 				reverse: function() {
-					return _wrap(ARRAY_PROTOTYPE.reverse[APPLY](this._, arguments));
+					return _wrap(ARRAY_PROTOTYPE[REVERSE][APPLY](this._, arguments));
 				},
 
 				shift: function() {
@@ -878,14 +880,14 @@ var Dinqyjs = (function() {
 				},
 
 				shuffle: function() {
-					this._.sort(_randomForSorting);
+					this._[SORT](_randomForSorting);
 					return this;
 				},
 
 				single: function(predicate) {
 					var matches = _unwrap(this);
 					if (_isFunction(predicate)) {
-						matches = _wrap(this).where(predicate).raw();
+						matches = _unwrap(_wrap(this).where(predicate));
 					}
 
 					if (matches[LENGTH] != 1) {
@@ -919,7 +921,7 @@ var Dinqyjs = (function() {
 
 				union: function(other) {
 					var unioned = this.clone();
-					ARRAY_PROTOTYPE.push[APPLY](unioned.raw(), _unwrap(other));
+					ARRAY_PROTOTYPE[PUSH][APPLY](_unwrap(unioned), _unwrap(other));
 					return unioned;
 				},
 
