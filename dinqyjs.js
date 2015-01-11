@@ -16,6 +16,12 @@ var Dinqyjs = (function() {
 	FALSE = false,
 	ARRAY = Array,
 	ARRAY_PROTOTYPE = ARRAY.prototype,
+	LENGTH = "length",
+	APPLY = "apply",
+	PUSH = "push",
+	SLICE = "slice",
+	SPLICE = "splice",
+	INDEXOF = "indexOf",
 
 	_arrayElementCompare = function(element) {
 		return function(other) {
@@ -48,9 +54,9 @@ var Dinqyjs = (function() {
 		inner = _wrap(inner).distinct(predicate).raw();
 		outer = _unwrap(outer);
 
-		outerLength = outer.length;
+		outerLength = outer[LENGTH];
 
-		while (i < inner.length) {
+		while (i < inner[LENGTH]) {
 			x = inner[i++];
 			j = 0;
 			while (j < outerLength)	{
@@ -61,7 +67,7 @@ var Dinqyjs = (function() {
 				j++;
 			}
 			if (j === outerLength) {
-				difference.push(x);
+				difference[PUSH](x);
 			}
 		}
 		return _wrap(difference);
@@ -88,7 +94,7 @@ var Dinqyjs = (function() {
 
 	_firstIndex = function(array, predicate, increments, startIndex, count) {
 		var thisElement,
-			thisLength = array.length;
+			thisLength = array[LENGTH];
 
 		increments = increments || 1;
 
@@ -115,13 +121,13 @@ var Dinqyjs = (function() {
 		return -1;
 	},
 
-	_getTop1 = function(comparison, arr, selector) {
+	_getTop1 = function(comparison, array, selector) {
 		var	thisElement,
 			useSelector = _isFunction(selector),
 			elementToCheckAgainst;
 
-		for(var i = 0, thisLength = arr.length, extreme = thisLength > 0 ? arr[0] : NULL; i < thisLength; i++) {
-			thisElement = arr[i];
+		for(var i = 0, thisLength = array[LENGTH], extreme = thisLength > 0 ? array[0] : NULL; i < thisLength; i++) {
+			thisElement = array[i];
 			elementToCheckAgainst = (useSelector ? selector(thisElement) : thisElement);
 			if (comparison ?
 				elementToCheckAgainst <= extreme :
@@ -149,7 +155,7 @@ var Dinqyjs = (function() {
 	},
 
 	_loop = function(array, callback, condition, returnOn) {
-		for (var i = 0; i < array.length && condition(array[i], i) != returnOn; i++) {
+		for (var i = 0; i < array[LENGTH] && condition(array[i], i) != returnOn; i++) {
 			callback(array[i], i);
 		}
 	},
@@ -170,14 +176,14 @@ var Dinqyjs = (function() {
 			useElementSelector = _isFunction(elementSelector),
 			useResultSelector = _isFunction(resultSelector);
 
-		while (i < array.length) {
+		while (i < array[LENGTH]) {
 			thisElement = array[i++];
 			p = keySelector(thisElement);
 			if (useElementSelector) {
 				thisElement = elementSelector(thisElement);
 			}
 
-			(partitions[p] = (p in partitions) ? partitions[p] : []).push(thisElement);
+			(partitions[p] = (p in partitions) ? partitions[p] : [])[PUSH](thisElement);
 		}
 
 		if (useResultSelector) {
@@ -224,7 +230,7 @@ var Dinqyjs = (function() {
 	},
 
 	_sortAndThenSortMore = function(array, selectors) {
-		if (_isUndefined(selectors) || selectors.length < 1) {
+		if (_isUndefined(selectors) || selectors[LENGTH] < 1) {
 			array.sort(_defaultSort);
 			return;
 		}
@@ -245,7 +251,7 @@ var Dinqyjs = (function() {
 				ySelected,
 				direction,
 				thisSelector,
-				selectorsLength = selectors.length;
+				selectorsLength = selectors[LENGTH];
 
 			while (s < selectorsLength && result === 0) {
 				thisSelector = selectors[s++];
@@ -256,7 +262,7 @@ var Dinqyjs = (function() {
 				direction = 0;
 				if (s < selectorsLength &&
 					typeof selectors[s] == "string" &&
-					selectors[s].indexOf("des") === 0
+					selectors[s][INDEXOF]("des") === 0
 				) {
 					direction = 1;
 				}
@@ -275,7 +281,7 @@ var Dinqyjs = (function() {
 
 	_total = function(array, summingFunction, selector) {
 		var total = NULL,
-			i = array.length - 1,
+			i = array[LENGTH] - 1,
 			thisElement,
 			usePredicate = _isFunction(selector),
 			toAdd;
@@ -309,8 +315,8 @@ var Dinqyjs = (function() {
 	};
 
 	//Array polyfills:
-	if (!ARRAY_PROTOTYPE.indexOf) {
-		ARRAY_PROTOTYPE.indexOf = function(element, start) {
+	if (!ARRAY_PROTOTYPE[INDEXOF]) {
+		ARRAY_PROTOTYPE[INDEXOF] = function(element, start) {
 			return _firstIndex(this, _arrayElementCompare(element), 1, start);
 		};
 	}
@@ -323,7 +329,7 @@ var Dinqyjs = (function() {
 
 	if (!ARRAY_PROTOTYPE.map) {
 		ARRAY_PROTOTYPE.map = function(callback) {
-			var thisLength = this.length,
+			var thisLength = this[LENGTH],
 				results = new ARRAY(thisLength > _config.ARRAY_PREALLOCATION ?
 				0 :
 				thisLength),
@@ -355,14 +361,14 @@ var Dinqyjs = (function() {
 			Collection.associative = function(object) {
 				for (var i in object) {
 					if (!_isFunction(object[i])) {
-						return +object.length === 0;
+						return +object[LENGTH] === 0;
 					}
 				}
 				return FALSE;
 			};
 
 			Collection.configure = function(key, value) {
-				return _config[key] = (arguments.length < 2 ? _config[key] : value);
+				return _config[key] = (arguments[LENGTH] < 2 ? _config[key] : value);
 			};
 
 			Collection.transpose = function(/*collections or arrays*/) {
@@ -372,17 +378,17 @@ var Dinqyjs = (function() {
 					thisArrayLength,
 					results = [];
 
-				for(var i = 0, argsLength = arguments.length; i < argsLength; i++) {
+				for(var i = 0, argsLength = arguments[LENGTH]; i < argsLength; i++) {
 					thisArray = _unwrap(args[i]);
-					thisArrayLength = thisArray.length;
+					thisArrayLength = thisArray[LENGTH];
 
-					while (results.length < thisArrayLength) {
-						results.push([]);
+					while (results[LENGTH] < thisArrayLength) {
+						results[PUSH]([]);
 					}
 
 					a = 0;
 					while (a < thisArrayLength) {
-						results[a].push(thisArray[a++]);
+						results[a][PUSH](thisArray[a++]);
 					}
 				}
 
@@ -394,7 +400,7 @@ var Dinqyjs = (function() {
 					var all = TRUE,
 						i = 0;
 
-					while (i < this._.length) {
+					while (i < this._[LENGTH]) {
 						all &= predicate(this._[i++]);
 					}
 					return all ? TRUE : FALSE;
@@ -410,24 +416,24 @@ var Dinqyjs = (function() {
 				},
 
 				atRandom: function() {
-					return this._[Math.floor(Math.random() * this._.length)];
+					return this._[Math.floor(Math.random() * this._[LENGTH])];
 				},
 
 				average: function(selector) {
-					var thisLength = this._.length;
+					var thisLength = this._[LENGTH];
 					return thisLength ? this.sum(selector) / thisLength : 0;
 				},
 
 				clear: function() {
-					this._.splice(0, this._.length);
+					this._[SPLICE](0, this._[LENGTH]);
 				},
 
 				clearWhere: function(selector) {
-					var i = this._.length - 1;
+					var i = this._[LENGTH] - 1;
 
 					while (i >= 0) {
 						if (selector(this._[i])) {
-							this._.splice(i, 1);
+							this._[SPLICE](i, 1);
 						}
 						i--;
 					}
@@ -439,16 +445,16 @@ var Dinqyjs = (function() {
 				},
 
 				concat: function() {
-					return _wrap(ARRAY_PROTOTYPE.concat.apply(this._, arguments));
+					return _wrap(ARRAY_PROTOTYPE.concat[APPLY](this._, arguments));
 				},
 
 				contains: function(item) {
-					return this._.indexOf(item) > -1;
+					return this._[INDEXOF](item) > -1;
 				},
 
 				count: function(element) {
 					var i = 0,
-					arrayLength = this._.length,
+					arrayLength = this._[LENGTH],
 					count = 0;
 					if (_isUndefined(element)) {
 						return arrayLength;
@@ -478,19 +484,19 @@ var Dinqyjs = (function() {
 						distinct = [],
 						x,
 						y,
-						j;
+						i,
+						j,
+						thisLength;
 
-					for(var i = 0, thisLength = this._.length; i < thisLength; i++) {
+					for(i = 0, thisLength = this._[LENGTH]; i < thisLength; i++) {
 						x = this._[i];
-						if (distinct.indexOf(x) == -1) {
-							j = 0;
-							while (j < thisLength) {
+						if (distinct[INDEXOF](x) == -1) {
+							for(j = 0; j < thisLength; j++) {
 								y = this._[j];
 								if (usePredicate && selector(x, y) || !usePredicate && x === y) {
-									distinct.push(x);
+									distinct[PUSH](x);
 									break;
 								}
-								j++;
 							}
 						}
 					}
@@ -507,30 +513,30 @@ var Dinqyjs = (function() {
 
 				each: function(callback) {
 					var i = 0,
-						thisLength = this._.length;
+						thisLength = this._[LENGTH];
 
 					if (thisLength === +thisLength && !Collection.associative(this._)) {
 						while (i < thisLength) {
 							callback(this._[i], i++);
 						}
-					} else {
-						_eachKeys(this._, callback);
+						return;
 					}
+					_eachKeys(this._, callback);
 				},
 
 				element: function(index, item) {
-					return (this._[index] = arguments.length > 1 ? item : this._[index]);
+					return (this._[index] = arguments[LENGTH] > 1 ? item : this._[index]);
 				},
 
 				equalTo: function(other, predicate) {
 					other = _unwrap(other);
-					var thisLength = this._.length,
+					var thisLength = this._[LENGTH],
 						i = thisLength - 1,
 						useFunction = _isFunction(predicate),
 						thisElement,
 						otherElement;
 
-					if (thisLength != other.length) {
+					if (thisLength != other[LENGTH]) {
 						return FALSE;
 					}
 					while (i >= 0) {
@@ -571,9 +577,9 @@ var Dinqyjs = (function() {
 						flattened = _wrap([]),
 						thisElement;
 
-					while (i < this._.length) {
+					while (i < this._[LENGTH]) {
 						thisElement = this._[i++];
-						Collection.prototype.push.apply(
+						Collection.prototype.push[APPLY](
 							flattened, ARRAY.isArray(thisElement) ?
 							thisElement :
 							[ thisElement ]
@@ -588,7 +594,7 @@ var Dinqyjs = (function() {
 						elementSelector,
 						resultSelector),
 						key;
-						this._.splice(0, this._.length);
+						this._[SPLICE](0, this._[LENGTH]);
 
 					for (key in partition) {
 						this._[key] = partition[key];
@@ -597,7 +603,7 @@ var Dinqyjs = (function() {
 				},
 
 				indexOf: function() {
-					return ARRAY_PROTOTYPE.indexOf.apply(this._, arguments);
+					return ARRAY_PROTOTYPE[INDEXOF][APPLY](this._, arguments);
 				},
 
 				innerJoin: function(other, predicate, joinedObjectCreator) {
@@ -615,13 +621,13 @@ var Dinqyjs = (function() {
 					i = 0,
 					j;
 
-					while (i < this._.length) {
+					while (i < this._[LENGTH]) {
 						innerElement = this._[i++];
 						j = 0;
-						while (j < other.length) {
+						while (j < other[LENGTH]) {
 							outerElement = other[j++];
 							if (predicate(innerElement, outerElement)) {
-								joined.push(joinedObjectCreator(innerElement, outerElement));
+								joined[PUSH](joinedObjectCreator(innerElement, outerElement));
 							}
 						}
 					}
@@ -629,19 +635,17 @@ var Dinqyjs = (function() {
 				},
 
 				insert: function(index, element) {
-					this._.splice(index, 0, element);
+					this._[SPLICE](index, 0, element);
 				},
 
 				insertRange: function(index, elements) {
-					ARRAY_PROTOTYPE
-						.splice
-						.apply(this._,
-							[ index, 0 ].concat(
-								arguments.length < 3 ?
-								_unwrap(elements) :
-								ARRAY_PROTOTYPE.slice.call(arguments, 1)
-							)
-						);
+					ARRAY_PROTOTYPE[SPLICE][APPLY](this._,
+						[ index, 0 ].concat(
+							arguments[LENGTH] < 3 ?
+							_unwrap(elements) :
+							ARRAY_PROTOTYPE.slice.call(arguments, 1)
+						)
+					);
 				},
 
 				interquartileRange: function(selector) {
@@ -658,15 +662,15 @@ var Dinqyjs = (function() {
 						thisDistinct = this.distinct(predicate).raw(),
 						otherDistinct = _wrap(other).distinct(predicate).raw();
 
-					while (i < thisDistinct.length) {
+					while (i < thisDistinct[LENGTH]) {
 						x = thisDistinct[i++];
 						j = 0;
-						while (j < otherDistinct.length) {
+						while (j < otherDistinct[LENGTH]) {
 							y = otherDistinct[j++];
 							if (usePredicate && predicate(x, y) ||
 								!usePredicate && x === y
 							) {
-								intersection.push(x);
+								intersection[PUSH](x);
 								break;
 							}
 						}
@@ -675,7 +679,7 @@ var Dinqyjs = (function() {
 				},
 
 				join: function() {
-					return ARRAY_PROTOTYPE.join.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.join[APPLY](this._, arguments);
 				},
 
 				keys: function() {
@@ -683,7 +687,7 @@ var Dinqyjs = (function() {
 						key;
 					for (key in this._) {
 						if (!_isFunction(this._[key])) {
-							keys.push(key);
+							keys[PUSH](key);
 						}
 					}
 					return keys;
@@ -698,7 +702,7 @@ var Dinqyjs = (function() {
 				},
 
 				lastIndexOf: function() {
-					return ARRAY_PROTOTYPE.lastIndexOf.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.lastIndexOf[APPLY](this._, arguments);
 				},
 
 				lowerquartile: function(selector) {
@@ -709,7 +713,7 @@ var Dinqyjs = (function() {
 					if (_isFunction(selector)) {
 						var results = [];
 						this.each(function (e) {
-							results.push(selector(e));
+							results[PUSH](selector(e));
 						});
 						return _wrap(results);
 					}
@@ -736,7 +740,7 @@ var Dinqyjs = (function() {
 				},
 
 				middle: function(evenResolver) {
-					return this._[_arrayMidpoint(this._.length - 1, evenResolver)];
+					return this._[_arrayMidpoint(this._[LENGTH] - 1, evenResolver)];
 				},
 
 				min: function(selector) {
@@ -756,11 +760,11 @@ var Dinqyjs = (function() {
 					.ascending()
 					.raw();
 
-					while (i < selection.length) {
+					while (i < selection[LENGTH]) {
 						element = selection[i++];
 						currentCount = (element === lastElement ? currentCount + 1 : 0);
 						if (currentCount === highestCount) {
-							highestElements.push(element);
+							highestElements[PUSH](element);
 						} else if (currentCount > highestCount) {
 							highestElements = [element];
 							highestCount++;
@@ -772,7 +776,7 @@ var Dinqyjs = (function() {
 				},
 
 				multiply: function(selector) {
-					return this._.length > 0 ? _total(this._, _multiply, selector) : 0;
+					return this._[LENGTH] > 0 ? _total(this._, _multiply, selector) : 0;
 				},
 
 				orderBy: function(/*selectors*/) {
@@ -783,7 +787,7 @@ var Dinqyjs = (function() {
 					var joined = [],
 						innerElement,
 						outerElement,
-						outerFound,
+						outerNotFound,
 						i = 0,
 						j,
 						usePredicate = _isFunction(predicate);
@@ -796,34 +800,34 @@ var Dinqyjs = (function() {
 						joinedObjectCreator = _joinXY;
 					}
 
-					while (i < this._.length) {
+					while (i < this._[LENGTH]) {
 						innerElement = this._[i++];
-						outerFound = 0;
+						outerNotFound = 1;
 						j = 0;
-						while (j < other.length) {
+						while (j < other[LENGTH]) {
 							outerElement = other[j++];
 							if (usePredicate && predicate(innerElement, outerElement) ||
 								!usePredicate && innerElement === outerElement
 							) {
-								outerFound = 1;
-								joined.push(joinedObjectCreator(innerElement, outerElement));
+								outerNotFound = 0;
+								joined[PUSH](joinedObjectCreator(innerElement, outerElement));
 							}
 						}
 
-						if (!outerFound) {
-							joined.push(joinedObjectCreator(innerElement, NULL));
+						if (outerNotFound) {
+							joined[PUSH](joinedObjectCreator(innerElement, NULL));
 						}
 					}
 					return _wrap(joined);
 				},
 
 				pack: function() {
-					var i = this._.length - 1,
+					var i = this._[LENGTH] - 1,
 						thisElement;
 					while (i >= 0) {
 						thisElement = this._[i];
 						if (_isUndefined(thisElement) || thisElement === NULL) {
-							this._.splice(i, 1);
+							this._[SPLICE](i, 1);
 						}
 						i--;
 					}
@@ -835,23 +839,22 @@ var Dinqyjs = (function() {
 				},
 
 				pop: function() {
-					return ARRAY_PROTOTYPE.pop.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.pop[APPLY](this._, arguments);
 				},
 
 				push: function() {
-					return ARRAY_PROTOTYPE.push.apply(this._, arguments);
+					return ARRAY_PROTOTYPE[PUSH][APPLY](this._, arguments);
 				},
 
 				pushRepeatedly: function(element, times) {
-					var i = 0;
-					while (i < times) {
-						this.push(element);
+					for (var i = 0; i < times; i++) {
+						this[PUSH](element);
 					}
 					return this;
 				},
 
 				range: function(startBefore, endBefore) {
-					return _wrap(this._.slice(startBefore, endBefore));
+					return _wrap(this._[SLICE](startBefore, endBefore));
 				},
 
 				raw: function() {
@@ -859,19 +862,19 @@ var Dinqyjs = (function() {
 				},
 
 				removeAt: function(index) {
-					this._.splice(index, 1);
+					this._[SPLICE](index, 1);
 				},
 
 				removeRange: function(start, count) {
-					this._.splice(start, count);
+					this._[SPLICE](start, count);
 				},
 
 				reverse: function() {
-					return _wrap(ARRAY_PROTOTYPE.reverse.apply(this._, arguments));
+					return _wrap(ARRAY_PROTOTYPE.reverse[APPLY](this._, arguments));
 				},
 
 				shift: function() {
-					return ARRAY_PROTOTYPE.shift.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.shift[APPLY](this._, arguments);
 				},
 
 				shuffle: function() {
@@ -885,43 +888,43 @@ var Dinqyjs = (function() {
 						matches = _wrap(this).where(predicate).raw();
 					}
 
-					if (matches.length != 1) {
+					if (matches[LENGTH] != 1) {
 						_error(_errorNotExactlyOneMatch);
 					}
 					return matches[0];
 				},
 
 				skip: function(count) {
-					return _wrap(this._.slice(count));
+					return _wrap(this._[SLICE](count));
 				},
 
 				sort: function() {
-					ARRAY_PROTOTYPE.sort.apply(this._, arguments);
+					ARRAY_PROTOTYPE.sort[APPLY](this._, arguments);
 					return this;
 				},
 
 				sum: function(selector) {
-					return this._.length > 0 ? _total(this._, function(runningTotal, value) {
+					return this._[LENGTH] > 0 ? _total(this._, function(runningTotal, value) {
 						return runningTotal + value;
 					}, selector) : 0;
 				},
 
 				take: function(count) {
-					return _wrap(this._.slice(0, count));
+					return _wrap(this._[SLICE](0, count));
 				},
 
 				toString: function() {
-					return ARRAY_PROTOTYPE.toString.apply(this._);
+					return ARRAY_PROTOTYPE.toString[APPLY](this._);
 				},
 
 				union: function(other) {
 					var unioned = this.clone();
-					ARRAY_PROTOTYPE.push.apply(unioned.raw(), _unwrap(other));
+					ARRAY_PROTOTYPE.push[APPLY](unioned.raw(), _unwrap(other));
 					return unioned;
 				},
 
 				unshift: function() {
-					return ARRAY_PROTOTYPE.unshift.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.unshift[APPLY](this._, arguments);
 				},
 
 				upperquartile: function(selector) {
@@ -929,7 +932,7 @@ var Dinqyjs = (function() {
 				},
 
 				valueOf: function() {
-					return ARRAY_PROTOTYPE.valueOf.apply(this._, arguments);
+					return ARRAY_PROTOTYPE.valueOf[APPLY](this._, arguments);
 				},
 
 				where: function(predicate) {
@@ -937,10 +940,10 @@ var Dinqyjs = (function() {
 						thisElement,
 						i = 0;
 
-					while (i < this._.length) {
+					while (i < this._[LENGTH]) {
 						thisElement = this._[i++];
 						if (predicate(thisElement)) {
-							matches.push(thisElement);
+							matches[PUSH](thisElement);
 						}
 					}
 					return _wrap(matches);
