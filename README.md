@@ -10,7 +10,7 @@ Over 60 functions.
 Tiny
 ----
 
-8kb minified. A footprint that will barely register.
+Barely 8kb minified. A footprint that will barely register.
 
 Simple
 ------

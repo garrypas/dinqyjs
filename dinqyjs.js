@@ -14,17 +14,23 @@ var Dinqyjs = (function() {
 	UNDEFINED = void 0,
 	TRUE = true,
 	FALSE = false,
+	APPLY = "apply",
 	ARRAY = Array,
 	ARRAY_PROTOTYPE = ARRAY.prototype,
+	CEIL = Math.ceil,
+	CLONE = "clone",
+	CONCAT = "concat",
 	LENGTH = "length",
-	APPLY = "apply",
+	INDEXOF = "indexOf",
+	ISARRAY = "isArray",
+	LASTINDEXOF = "lastIndexOf",
+	PARSEINT = parseInt,
 	PUSH = "push",
+	RANDOM = Math.random,
 	REVERSE = "reverse",
 	SLICE = "slice",
 	SORT = "sort",
 	SPLICE = "splice",
-	INDEXOF = "indexOf",
-	LASTINDEXOF = "lastIndexOf",
 
 	_arrayElementCompare = function(element) {
 		return function(other) {
@@ -34,7 +40,7 @@ var Dinqyjs = (function() {
 
 	_arrayMidpoint = function(arrayLength, evenResolver) {
 		var index = arrayLength /  2;
-		return parseInt(evenResolver > 0 ? Math.ceil(index) : index);
+		return PARSEINT(evenResolver > 0 ? CEIL(index) : index);
 	},
 
 	_config = {
@@ -214,12 +220,12 @@ var Dinqyjs = (function() {
 		}
 
 		//Set up a clone of the array
-		sorted = _unwrap(collection).concat();
+		sorted = _unwrap(collection)[CONCAT]();
 		_sortAndThenSortMore(sorted, selector);
 
 		quartilePosition = _minitabVariation(q, collectionLength);
-		lowerIndex = parseInt(quartilePosition);
-		upperIndex = parseInt(Math.ceil(quartilePosition));
+		lowerIndex = PARSEINT(quartilePosition);
+		upperIndex = PARSEINT(CEIL(quartilePosition));
 		lowerValue = sorted[lowerIndex - 1];
 		upperValue = sorted[upperIndex - 1];
 		lowerElement = useSelector ? selector(lowerValue) : lowerValue;
@@ -229,7 +235,7 @@ var Dinqyjs = (function() {
 	},
 
 	_randomForSorting = function() {
-		return Math.random() - 0.5;
+		return RANDOM() - 0.5;
 	},
 
 	_sortAndThenSortMore = function(array, selectors) {
@@ -349,8 +355,8 @@ var Dinqyjs = (function() {
 		};
 	}
 
-	if (!ARRAY.isArray) {
-		ARRAY.isArray = function(arg) {
+	if (!ARRAY[ISARRAY]) {
+		ARRAY[ISARRAY] = function(arg) {
 			return arg.constructor === ARRAY;
 		};
 	}
@@ -419,7 +425,7 @@ var Dinqyjs = (function() {
 				},
 
 				atRandom: function() {
-					return this._[Math.floor(Math.random() * this._[LENGTH])];
+					return this._[Math.floor(RANDOM() * this._[LENGTH])];
 				},
 
 				average: function(selector) {
@@ -444,11 +450,11 @@ var Dinqyjs = (function() {
 				},
 
 				clone: function() {
-					return _wrap(this._.concat());
+					return _wrap(this._[CONCAT]());
 				},
 
 				concat: function() {
-					return _wrap(ARRAY_PROTOTYPE.concat[APPLY](this._, arguments));
+					return _wrap(ARRAY_PROTOTYPE[CONCAT][APPLY](this._, arguments));
 				},
 
 				contains: function(item) {
@@ -583,7 +589,7 @@ var Dinqyjs = (function() {
 					while (i < this._[LENGTH]) {
 						thisElement = this._[i++];
 						Collection.prototype[PUSH][APPLY](
-							flattened, ARRAY.isArray(thisElement) ?
+							flattened, ARRAY[ISARRAY](thisElement) ?
 							thisElement :
 							[ thisElement ]
 						);
@@ -611,8 +617,8 @@ var Dinqyjs = (function() {
 
 				innerJoin: function(other, predicate, joinedObjectCreator) {
 					other = _unwrap(other);
-					if (!ARRAY.isArray(other)) {
-						return this.clone();
+					if (!ARRAY[ISARRAY](other)) {
+						return this[CLONE]();
 					}
 					if (!_isFunction(joinedObjectCreator)) {
 						joinedObjectCreator = _joinXY;
@@ -643,7 +649,7 @@ var Dinqyjs = (function() {
 
 				insertRange: function(index, elements) {
 					ARRAY_PROTOTYPE[SPLICE][APPLY](this._,
-						[ index, 0 ].concat(
+						[ index, 0 ][CONCAT](
 							arguments[LENGTH] < 3 ?
 							_unwrap(elements) :
 							ARRAY_PROTOTYPE.slice.call(arguments, 1)
@@ -732,7 +738,7 @@ var Dinqyjs = (function() {
 						middleCeil,
 						sorted;
 
-					sorted = this.clone();
+					sorted = this[CLONE]();
 					_sortAndThenSortMore(_unwrap(sorted), arguments);
 					middleFloor = sorted.middle();
 					middleCeil = sorted.middle(1);
@@ -759,7 +765,7 @@ var Dinqyjs = (function() {
 						i = 0,
 						element;
 
-					selection = _unwrap((_isFunction(selector) ? this.map(selector) : this.clone())
+					selection = _unwrap((_isFunction(selector) ? this.map(selector) : this[CLONE]())
 					.ascending());
 
 					while (i < selection[LENGTH]) {
@@ -795,8 +801,8 @@ var Dinqyjs = (function() {
 						usePredicate = _isFunction(predicate);
 
 					other = _unwrap(other);
-					if (!ARRAY.isArray(other)) {
-						return this.clone();
+					if (!ARRAY[ISARRAY](other)) {
+						return this[CLONE]();
 					}
 					if (!_isFunction(joinedObjectCreator)) {
 						joinedObjectCreator = _joinXY;
@@ -920,7 +926,7 @@ var Dinqyjs = (function() {
 				},
 
 				union: function(other) {
-					var unioned = this.clone();
+					var unioned = this[CLONE]();
 					ARRAY_PROTOTYPE[PUSH][APPLY](_unwrap(unioned), _unwrap(other));
 					return unioned;
 				},
