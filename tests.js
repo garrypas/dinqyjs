@@ -768,25 +768,46 @@
 			}).toThrow(new Error('Array contains no matching elements'));
 		});
 
-		it("lastIndexOf() -> returns the index of an element", function() {
+		it("lastIndexOf() native -> returns the index of an element", function() {
 			expect(list.raw().lastIndexOf(2)).toBe(1);
 		});
 
-		it("lastIndexOf() -> returns -1 when not found", function() {
+		it("lastIndexOf() native -> returns -1 when not found", function() {
 			expect(list.raw().lastIndexOf(11)).toBe(-1);
 		});
 
-		it("lastIndexOf() -> returns -1 when outside search range", function() {
+		it("lastIndexOf() native -> returns -1 when outside search range", function() {
 			expect(list.raw().lastIndexOf(2, 0)).toBe(-1);
 		});
 
-		it("lastIndexOf() -> returns -1 when inside search range", function() {
+		it("lastIndexOf() native -> returns -1 when inside search range", function() {
 			expect(list.raw().lastIndexOf(2, 1)).toBe(1);
+		});
+
+		it("lastIndexOf() native -> returns last index when duplicates", function() {
+			list.push(2);
+			expect(list.raw().lastIndexOf(2)).toBe(10);
+		});
+
+		it("lastIndexOf() -> returns the index of an element", function() {
+			expect(list.lastIndexOf(2)).toBe(1);
+		});
+
+		it("lastIndexOf() -> returns -1 when not found", function() {
+			expect(list.lastIndexOf(11)).toBe(-1);
+		});
+
+		it("lastIndexOf() -> returns -1 when outside search range", function() {
+			expect(list.lastIndexOf(2, 0)).toBe(-1);
+		});
+
+		it("lastIndexOf() -> returns -1 when inside search range", function() {
+			expect(list.lastIndexOf(2, 1)).toBe(1);
 		});
 
 		it("lastIndexOf() -> returns last index when duplicates", function() {
 			list.push(2);
-			expect(list.raw().lastIndexOf(2)).toBe(10);
+			expect(list.lastIndexOf(2)).toBe(10);
 		});
 
 		it("lowerquartile() -> returns Q1 when 1 element in middle of Q1", function() {
@@ -1125,6 +1146,12 @@
 			var partitioned = list.partition(predicate);
 			expect(partitioned.raw()).not.toEqual(list.raw());
 			expect(list.raw()).toEqual([1,2,3,4,5,6,7,8,9,10]);
+		});
+
+		it("pop() -> pop top element", function() {
+			var popped = list.pop();
+			expect(popped).toEqual(10);
+			expect(list.raw()).toEqual([1,2,3,4,5,6,7,8,9]);
 		});
 
 		it("push() -> pushes range when a list of elements", function() {

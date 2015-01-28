@@ -25,6 +25,7 @@ var Dinqyjs = (function() {
 	ISARRAY = "isArray",
 	LASTINDEXOF = "lastIndexOf",
 	PARSEINT = parseInt,
+	POP = "pop",
 	PUSH = "push",
 	RANDOM = Math.random,
 	REVERSE = "reverse",
@@ -41,6 +42,15 @@ var Dinqyjs = (function() {
 	_arrayMidpoint = function(arrayLength, evenResolver) {
 		var index = arrayLength /  2;
 		return PARSEINT(evenResolver > 0 ? CEIL(index) : index);
+	},
+
+	//Array polyfills:
+	_arrayIndexPolyfiller = function(name, increments) {
+		if (!ARRAY_PROTOTYPE[name]) {
+			ARRAY_PROTOTYPE[name] = function(element, start) {
+				return _firstIndex(this, _arrayElementCompare(element), increments, start);
+			};
+		}
 	},
 
 	_config = {
@@ -323,18 +333,9 @@ var Dinqyjs = (function() {
 		return array._ ?  array : new Dinqyjs.Collection(array);
 	};
 
-	//Array polyfills:
-	if (!ARRAY_PROTOTYPE[INDEXOF]) {
-		ARRAY_PROTOTYPE[INDEXOF] = function(element, start) {
-			return _firstIndex(this, _arrayElementCompare(element), 1, start);
-		};
-	}
+	_arrayIndexPolyfiller(INDEXOF, 1);
+	_arrayIndexPolyfiller(LASTINDEXOF, -1);
 
-	if (!ARRAY_PROTOTYPE[LASTINDEXOF]) {
-		ARRAY_PROTOTYPE[LASTINDEXOF] = function(element, start) {
-			return _firstIndex(this, _arrayElementCompare(element), -1, start);
-		};
-	}
 
 	if (!ARRAY_PROTOTYPE.map) {
 		ARRAY_PROTOTYPE.map = function(callback) {
@@ -438,13 +439,12 @@ var Dinqyjs = (function() {
 				},
 
 				clearWhere: function(selector) {
-					var i = this._[LENGTH] - 1;
+					var me = this._;
 
-					while (i >= 0) {
-						if (selector(this._[i])) {
-							this._[SPLICE](i, 1);
+					for(var i = me[LENGTH] - 1; i >= 0; i--) {
+						if (selector(me[i])) {
+							me[SPLICE](i, 1);
 						}
-						i--;
 					}
 					return this;
 				},
@@ -463,14 +463,16 @@ var Dinqyjs = (function() {
 
 				count: function(element) {
 					var i = 0,
-					arrayLength = this._[LENGTH],
-					count = 0;
-					if (_isUndefined(element)) {
-						return arrayLength;
-					}
-					while (i < arrayLength) {
-						if (this._[i++] === element) {
-							count++;
+						me = this._,
+						arrayLength = me[LENGTH],
+						count = arrayLength;
+
+					if (!_isUndefined(element)) {
+						count = 0;
+						while (i < arrayLength) {
+							if (me[i++] === element) {
+								count++;
+							}
 						}
 					}
 					return count;
@@ -495,13 +497,14 @@ var Dinqyjs = (function() {
 						y,
 						i,
 						j,
-						thisLength;
+						thisLength,
+						me = this._;
 
-					for(i = 0, thisLength = this._[LENGTH]; i < thisLength; i++) {
-						x = this._[i];
+					for(i = 0, thisLength = me[LENGTH]; i < thisLength; i++) {
+						x = me[i];
 						if (distinct[INDEXOF](x) == -1) {
 							for(j = 0; j < thisLength; j++) {
-								y = this._[j];
+								y = me[j];
 								if (usePredicate && selector(x, y) || !usePredicate && x === y) {
 									distinct[PUSH](x);
 									break;
@@ -522,15 +525,16 @@ var Dinqyjs = (function() {
 
 				each: function(callback) {
 					var i = 0,
-						thisLength = this._[LENGTH];
+						me = this._,
+						thisLength = me[LENGTH];
 
 					if (thisLength === +thisLength && !Collection.associative(this._)) {
 						while (i < thisLength) {
-							callback(this._[i], i++);
+							callback(me[i], i++);
 						}
 						return;
 					}
-					_eachKeys(this._, callback);
+					_eachKeys(me, callback);
 				},
 
 				element: function(index, item) {
@@ -539,7 +543,8 @@ var Dinqyjs = (function() {
 
 				equalTo: function(other, predicate) {
 					other = _unwrap(other);
-					var thisLength = this._[LENGTH],
+					var me = this._,
+						thisLength = me[LENGTH],
 						i = thisLength - 1,
 						useFunction = _isFunction(predicate),
 						thisElement,
@@ -549,7 +554,7 @@ var Dinqyjs = (function() {
 						return FALSE;
 					}
 					while (i >= 0) {
-						thisElement = this._[i];
+						thisElement = me[i];
 						otherElement = other[i--];
 						if (useFunction ?
 							!predicate(thisElement, otherElement) :
@@ -584,10 +589,11 @@ var Dinqyjs = (function() {
 				flatten: function() {
 					var i = 0,
 						flattened = _wrap([]),
-						thisElement;
+						thisElement,
+						me = this._;
 
-					while (i < this._[LENGTH]) {
-						thisElement = this._[i++];
+					while (i < me[LENGTH]) {
+						thisElement = me[i++];
 						Collection.prototype[PUSH][APPLY](
 							flattened, ARRAY[ISARRAY](thisElement) ?
 							thisElement :
@@ -602,11 +608,12 @@ var Dinqyjs = (function() {
 						keySelector,
 						elementSelector,
 						resultSelector),
-						key;
-						this._[SPLICE](0, this._[LENGTH]);
+						key,
+						me = this._;
+						me[SPLICE](0, me[LENGTH]);
 
 					for (key in partition) {
-						this._[key] = partition[key];
+						me[key] = partition[key];
 					}
 					return this;
 				},
@@ -616,6 +623,13 @@ var Dinqyjs = (function() {
 				},
 
 				innerJoin: function(other, predicate, joinedObjectCreator) {
+					var joined = [],
+						me = this._,
+						innerElement,
+						outerElement,
+						i = 0,
+						j;
+
 					other = _unwrap(other);
 					if (!ARRAY[ISARRAY](other)) {
 						return this[CLONE]();
@@ -624,14 +638,8 @@ var Dinqyjs = (function() {
 						joinedObjectCreator = _joinXY;
 					}
 
-					var joined = [],
-					innerElement,
-					outerElement,
-					i = 0,
-					j;
-
-					while (i < this._[LENGTH]) {
-						innerElement = this._[i++];
+					while (i < me[LENGTH]) {
+						innerElement = me[i++];
 						j = 0;
 						while (j < other[LENGTH]) {
 							outerElement = other[j++];
@@ -693,9 +701,10 @@ var Dinqyjs = (function() {
 
 				keys: function() {
 					var keys = [],
-						key;
-					for (key in this._) {
-						if (!_isFunction(this._[key])) {
+						key,
+						me = this._;
+					for (key in me) {
+						if (!_isFunction(me[key])) {
 							keys[PUSH](key);
 						}
 					}
@@ -703,9 +712,10 @@ var Dinqyjs = (function() {
 				},
 
 				last: function(predicate) {
-					var firstIndex = _firstIndex(this._, predicate, -1);
+					var me = this._,
+						firstIndex = _firstIndex(me, predicate, -1);
 					if (firstIndex >= 0) {
-						return this._[firstIndex];
+						return me[firstIndex];
 					}
 					_error(_errorNoMatches);
 				},
@@ -719,14 +729,15 @@ var Dinqyjs = (function() {
 				},
 
 				map: function(selector) {
+					var result = void 0;
 					if (_isFunction(selector)) {
 						var results = [];
 						this.each(function (e) {
 							results[PUSH](selector(e));
 						});
-						return _wrap(results);
+						result = _wrap(results);
 					}
-					return void 0;
+					return result;
 				},
 
 				max: function(selector) {
@@ -744,7 +755,7 @@ var Dinqyjs = (function() {
 					middleCeil = sorted.middle(1);
 
 					return middleFloor < middleCeil ?
-							((middleFloor + middleCeil) / 2) :
+							(middleFloor + middleCeil) / 2 :
 							middleFloor;
 				},
 
@@ -830,14 +841,15 @@ var Dinqyjs = (function() {
 				},
 
 				pack: function() {
-					var i = this._[LENGTH] - 1,
+					var me = this._,
 						thisElement;
-					while (i >= 0) {
-						thisElement = this._[i];
+
+					for(var i = me[LENGTH] - 1; i >= 0; i--)
+					{
+						thisElement = me[i];
 						if (_isUndefined(thisElement) || thisElement === NULL) {
-							this._[SPLICE](i, 1);
+							me[SPLICE](i, 1);
 						}
-						i--;
 					}
 					return this;
 				},
@@ -847,7 +859,7 @@ var Dinqyjs = (function() {
 				},
 
 				pop: function() {
-					return ARRAY_PROTOTYPE.pop[APPLY](this._, arguments);
+					return ARRAY_PROTOTYPE[POP][APPLY](this._, arguments);
 				},
 
 				push: function() {
@@ -907,7 +919,7 @@ var Dinqyjs = (function() {
 				},
 
 				sort: function() {
-					ARRAY_PROTOTYPE.sort[APPLY](this._, arguments);
+					ARRAY_PROTOTYPE[SORT][APPLY](this._, arguments);
 					return this;
 				},
 
@@ -946,10 +958,11 @@ var Dinqyjs = (function() {
 				where: function(predicate) {
 					var matches = [],
 						thisElement,
-						i = 0;
+						i = 0,
+						me = this._;
 
-					while (i < this._[LENGTH]) {
-						thisElement = this._[i++];
+					while (i < me[LENGTH]) {
+						thisElement = me[i++];
 						if (predicate(thisElement)) {
 							matches[PUSH](thisElement);
 						}
