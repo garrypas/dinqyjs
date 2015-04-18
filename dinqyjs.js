@@ -66,9 +66,7 @@ var Dinqyjs = (function() {
 	},
 
 	_crossJoinSelector = function(x, y) {
-		var i,
-		 	iEnd,
-			prop,
+		var prop,
 			joined = {};
 
 		if (_boolOrNumber(y)) {
