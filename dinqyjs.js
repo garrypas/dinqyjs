@@ -53,8 +53,40 @@ var Dinqyjs = (function() {
 		}
 	},
 
+	_boolOrNumber = function(x) {
+		return typeof x == 'number' || typeof x == 'boolean';
+	},
+
+	_clone = function(obj) {
+		return _wrap(obj._[CONCAT]());
+	},
+
 	_config = {
 		ARRAY_PREALLOCATION: 64000
+	},
+
+	_crossJoinSelector = function(x, y) {
+		var i,
+		 	iEnd,
+			prop,
+			joined = {};
+
+		if (_boolOrNumber(y)) {
+			y = { right : y };
+		}
+
+		for(prop in y) {
+			joined[prop] = y[prop];
+		}
+
+		if (_boolOrNumber(x)) {
+			x = { left : x };
+		}
+
+		for(prop in x) {
+			joined[prop] = x[prop];
+		}
+		return joined;
 	},
 
 	_defaultSort = function(x, y) {
@@ -378,7 +410,7 @@ var Dinqyjs = (function() {
 			};
 
 			Collection.configure = function(key, value) {
-				return _config[key] = (arguments[LENGTH] < 2 ? _config[key] : value);
+				return (_config[key] = (arguments[LENGTH] < 2 ? _config[key] : value));
 			};
 
 			Collection.transpose = function(/*collections or arrays*/) {
@@ -450,7 +482,7 @@ var Dinqyjs = (function() {
 				},
 
 				clone: function() {
-					return _wrap(this._[CONCAT]());
+					return _clone(this);
 				},
 
 				concat: function() {
@@ -476,6 +508,25 @@ var Dinqyjs = (function() {
 						}
 					}
 					return count;
+				},
+
+				crossJoin: function(otherSet, selector) {
+					var i,
+						me = this._,
+						iEnd = me[LENGTH],
+						j,
+						jEnd = otherSet.length,
+						result = [];
+					if(_isUndefined(selector)) {
+						selector = _crossJoinSelector;
+					}
+					otherSet = _unwrap(otherSet);
+					for(i = 0; i < iEnd; i++) {
+						for(j = 0; j < jEnd; j++) {
+							result.push(selector(me[i], otherSet[j]));
+						}
+					}
+					return _wrap(result);
 				},
 
 				descending: function() {
@@ -796,6 +847,10 @@ var Dinqyjs = (function() {
 
 				multiply: function(selector) {
 					return this._[LENGTH] > 0 ? _total(this._, _multiply, selector) : 0;
+				},
+
+				none: function(predicate) {
+					return !this.any(predicate);
 				},
 
 				orderBy: function(/*selectors*/) {

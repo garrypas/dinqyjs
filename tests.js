@@ -97,7 +97,7 @@
 
 		it('associative() -> true if associative array', function() {
 			var associativeArray = [];
-			associativeArray["a"] = 1;
+			associativeArray.a = 1;
 			var isAssociative = Collection.associative(associativeArray);
 			expect(isAssociative).toBe(true);
 		});
@@ -196,6 +196,62 @@
 
 		it("count() -> with element", function() {
 			expect(new Collection([1,2,3,3,4,5]).count(3)).toBe(2);
+		});
+
+		it("crossJoin() -> clones elements", function() {
+			var obja = {}, objb = {};
+			var set1 = [obja];
+			var set2 = [objb];
+			var collection = new Collection(set1).crossJoin(set2);
+			var result = collection.first();
+			expect(result).not.toBe(obja);
+			expect(result).not.toBe(objb);
+		});
+
+		it("crossJoin() -> cross joins sets", function() {
+			var set1 = [{ x: 1,  y: 2  }, { x: 100,  y: 200  },];
+			var set2 = [{ a: 10, b: 20 }, { a: 1000, b: 2000 },];
+			var collection = new Collection(set1).crossJoin(set2);
+			var result = collection.raw();
+			console.log(result);
+			expect(result[0].x).toEqual(1);
+			expect(result[0].y).toEqual(2);
+			expect(result[0].a).toEqual(10);
+			expect(result[0].b).toEqual(20);
+
+			expect(result[1].x).toEqual(1);
+			expect(result[1].y).toEqual(2);
+			expect(result[1].a).toEqual(1000);
+			expect(result[1].b).toEqual(2000);
+
+			expect(result[2].x).toEqual(100);
+			expect(result[2].y).toEqual(200);
+			expect(result[2].a).toEqual(10);
+			expect(result[2].b).toEqual(20);
+
+			expect(result[3].x).toEqual(100);
+			expect(result[3].y).toEqual(200);
+			expect(result[3].a).toEqual(1000);
+			expect(result[3].b).toEqual(2000);
+		});
+
+		it("crossJoin() -> cross joins sets, primitives", function() {
+			var set1 = [1, 2];
+			var set2 = [3, 4];
+			var collection = new Collection(set1).crossJoin(set2);
+			var result = collection.raw();
+			console.log(result);
+			expect(result[0].left).toEqual(1);
+			expect(result[0].right).toEqual(3);
+
+			expect(result[1].left).toEqual(1);
+			expect(result[1].right).toEqual(4);
+
+			expect(result[2].left).toEqual(2);
+			expect(result[2].right).toEqual(3);
+
+			expect(result[3].left).toEqual(2);
+			expect(result[3].right).toEqual(4);
 		});
 
 		it("descending() -> sorts the list in descending order", function() {
@@ -320,9 +376,9 @@
 			var elements = [];
 			var keys = [];
 			var keyArray = [];
-			keyArray[ "one" ] = 1;
-			keyArray[ "two" ] = 2;
-			keyArray[ "three" ] = 3;
+			keyArray.one = 1;
+			keyArray.two = 2;
+			keyArray.three = 3;
 
 			new Collection(keyArray).each(function(element, key) {
 				elements.push(element);
@@ -347,7 +403,7 @@
 		it("element() -> gets element by key", function() {
 			var array = [];
 			array.push(1);
-			array[ "key" ] = 99;
+			array.key = 99;
 			expect(new Collection(array).element('key')).toBe(99);
 		});
 
@@ -358,7 +414,7 @@
 
 		it("element() -> sets element by key", function() {
 			var array = [];
-			array[ "key" ] = 99;
+			array.key = 99;
 			new Collection(array).element("key", 100);
 			expect(new Collection(array).element('key')).toBe(100);
 		});
@@ -933,6 +989,28 @@
 			expect(new Collection([2,3,4]).multiply(function(element) {
 				return element + 1;
 			})).toBe(60);
+		});
+
+
+		it("none() -> none matches predicate", function() {
+			var findNo10 = function(element) {
+				return element === 10;
+			};
+			expect(list.none(findNo10)).toBe(false);
+		});
+
+		it("none() -> none doesn't match predicate", function() {
+			var findNo10 = function(element) {
+				return element === 11;
+			};
+			expect(list.none(findNo10)).toBe(true);
+		});
+
+		it("none() -> none doesn't match predicate", function() {
+			var findNo10 = function(element) {
+				return element === 11;
+			};
+			expect(list.none(findNo10)).toBe(true);
 		});
 
 		it("orderBy() -> uses sort ascending then descending", function() {
