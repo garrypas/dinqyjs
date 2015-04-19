@@ -1244,6 +1244,24 @@
 			expect(range.raw()).toEqual([2,3]);
 		});
 
+		it("remove() -> removes element", function(){
+			var o1 = {},
+				o2 = {},
+				o3 = {},
+				list = [ o1, o2, o3 ];
+			new Collection(list).remove(o2);
+			expect(list).toEqual([o1,o3]);
+		});
+
+		it("remove() -> removes nothing if element is not found", function(){
+			var o1 = {},
+				o2 = {},
+				o3 = {},
+				list = [ o1, o2, o3 ];
+			new Collection(list).remove({});
+			expect(list).toEqual([o1,o2,o3]);
+		});
+
 		it("removeAt() -> removes at element", function() {
 			list.removeAt(1);
 			expect(list.raw().length).toBe(9);

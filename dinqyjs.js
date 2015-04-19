@@ -934,6 +934,13 @@ var Dinqyjs = (function() {
 					return this._;
 				},
 
+				remove: function(element) {
+					var index = this._.indexOf(element);
+					if(index > -1) {
+						this.removeAt(index);
+					}
+				},
+
 				removeAt: function(index) {
 					this._[SPLICE](index, 1);
 				},
