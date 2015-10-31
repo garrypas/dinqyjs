@@ -1,3 +1,5 @@
+var Dinqyjs = Dinqyjs || require('dinqyjs');	
+	
 	var Collection = Dinqyjs.Collection;
 
 	var createJoinSets = function () {
