@@ -2,9 +2,9 @@
   "name": "dinqyjs",
   "filename": "dinqyjs.min.js",
   "main": "dinqyjs.min.js",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "A tiny but powerful Javascript library for working with collections. No bells and whistles and unwanted bloat, just the things you really need.",
-  "author" : "Garry Passarella",
+  "author": "Garry Passarella",
   "homepage": "http://dinqyjs.com",
   "keywords": [
     "LINQ",
@@ -24,14 +24,19 @@
     }
   ],
   "devDependencies": {
-    "gulp" : "3.9.0",
+    "gulp": "3.9.0",
     "gulp-uglify": "1.4.2",
     "yargs": "3.29.0",
     "gulp-karma": "0.0.5",
     "karma-jasmine": "0.3.6",
     "karma-phantomjs-launcher": "0.2.1",
     "gulp-rename": "1.2.2",
-    "gulp-jshint":"1.12.0"
+    "gulp-jshint": "1.12.0"
   },
-  "license": [ { "type": "MIT", "url": "http://www.opensource.org/licenses/mit-license.php" } ]
+  "license": [
+    {
+      "type": "MIT",
+      "url": "http://www.opensource.org/licenses/mit-license.php"
+    }
+  ]
 }
