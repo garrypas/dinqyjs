@@ -287,8 +287,6 @@ var Dinqyjs = (function() {
 		selectors = _isFunction(selectors) ?
 					[ selectors ] :
 					ARRAY_PROTOTYPE.slice.call(selectors);
-
-
 		array[SORT](_sorterWithSelectors(selectors));
 	},
 
@@ -440,7 +438,7 @@ var Dinqyjs = (function() {
 					var all = TRUE,
 						i = 0;
 
-					while (i < this._[LENGTH]) {
+					while (all && i < this._[LENGTH]) {
 						all &= predicate(this._[i++]);
 					}
 					return all ? TRUE : FALSE;
@@ -934,10 +932,19 @@ var Dinqyjs = (function() {
 					return this._;
 				},
 
-				remove: function(element) {
-					var index = this._.indexOf(element);
-					if(index > -1) {
-						this.removeAt(index);
+				remove: function(elements) {
+					var index,
+						i;			
+					if(arguments.length > 1) {
+						elements = ARRAY_PROTOTYPE.slice.call(arguments); 
+					} else if (!ARRAY[ISARRAY](elements)) {
+						elements = [elements];
+					}
+					for(i = 0; i < elements.length; i++) {
+						index = this._.indexOf(elements[i]);
+						if(index > -1) {
+							this.removeAt(index);
+						}
 					}
 				},
 
@@ -1014,7 +1021,6 @@ var Dinqyjs = (function() {
 				valueOf: function() {
 					return ARRAY_PROTOTYPE.valueOf[APPLY](this._, arguments);
 				},
-
 				where: function(predicate) {
 					var matches = [],
 						thisElement,
@@ -1036,7 +1042,14 @@ var Dinqyjs = (function() {
 		}())
 	};
 }());
+
+//Shorthand to use Dinqy functionality
+var $Dq = function(arr) {
+	return new Dinqyjs.Collection(arr);
+};
+
 //For node.js
 if (typeof exports === "object" && exports) {
 	exports.Dinqyjs = Dinqyjs;
+	exports.$Dq = $Dq;
 }
