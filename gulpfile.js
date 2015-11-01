@@ -1,7 +1,7 @@
 var gulp = require('gulp');
 var uglify = require('gulp-uglify');
 var argv = require('yargs').argv;
-var karma = require('karma').server;
+var Server = require('karma').Server;
 var rename = require('gulp-rename');
 var jshint = require('gulp-jshint');
 var jeditor = require("gulp-json-editor");
@@ -18,10 +18,11 @@ gulp.task('uglify', function() {
 });
 
 gulp.task('tests', function(done) {
-	return karma.start({
+	var server = new Server({
 		configFile: __dirname + '/karma.conf.js',
 		singleRun: true
-	}, done);	
+	}, done);
+	server.start();
 });
 
 gulp.task('jshint', function() {
