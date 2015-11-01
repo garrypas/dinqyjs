@@ -35,6 +35,7 @@ gulp.task('jshint', function() {
 gulp.task('version', function() {
 	var versionNumber = argv.versionNumber;
 	if(!versionNumber) {
+		console.log('package.json not versioned. No version defined')
 		return gulp;
 	}
 	
