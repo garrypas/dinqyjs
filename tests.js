@@ -215,7 +215,7 @@ var Dinqyjs = Dinqyjs || require('dinqyjs');
 			var set2 = [{ a: 10, b: 20 }, { a: 1000, b: 2000 },];
 			var collection = new Collection(set1).crossJoin(set2);
 			var result = collection.raw();
-			console.log(result);
+
 			expect(result[0].x).toEqual(1);
 			expect(result[0].y).toEqual(2);
 			expect(result[0].a).toEqual(10);
@@ -242,7 +242,7 @@ var Dinqyjs = Dinqyjs || require('dinqyjs');
 			var set2 = [3, 4];
 			var collection = new Collection(set1).crossJoin(set2);
 			var result = collection.raw();
-			console.log(result);
+
 			expect(result[0].left).toEqual(1);
 			expect(result[0].right).toEqual(3);
 
@@ -1263,6 +1263,15 @@ var Dinqyjs = Dinqyjs || require('dinqyjs');
 			new Collection(list).remove([o1, o2]);
 			expect(list).toEqual([o3]);
 		});
+		
+		it("remove() -> removes multiple element passed as arguments", function(){
+			var o1 = {},
+				o2 = {},
+				o3 = {},
+				list = [ o1, o2, o3 ];
+			new Collection(list).remove(o1, o2);
+			expect(list).toEqual([o3]);
+		});
 
 		it("remove() -> removes nothing if element is not found", function(){
 			var o1 = {},
@@ -1422,5 +1431,10 @@ var Dinqyjs = Dinqyjs || require('dinqyjs');
 			var collectionValueOf = list.valueOf();
 			var arrayValueOf = list.raw().valueOf();
 			expect(collectionValueOf).toEqual(arrayValueOf);
+		});
+		
+		it("$Dq() -> wraps array and exposes functionlity", function() {
+			var collection = $Dq([1,2,3]);
+			expect(collection.raw()).toEqual([1,2,3]);
 		});
 	});
