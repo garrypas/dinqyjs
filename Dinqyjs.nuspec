@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Dinqyjs</id>
+        <version>1.5.0</version>
+        <title>Dinqy.js</title>
+        <authors>Garry Passarella</authors>
+        <projectUrl>http://dinqyjs.com</projectUrl>
+        <iconUrl>http://dinqyjs.com/nugetlogo.gif</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>A tiny, fast and rich Javascript LINQ-like library for working with collections. Barely 8KB minified, over 60 functions, highly optimized for performance. Works with browsers back to IE6.</description>
+        <summary />
+        <releaseNotes>Added crossJoin, none and remove functions.</releaseNotes>
+        <language>en-GB</language>
+        <tags>linq,javascript,lambda,underscore,lo-dash,arrays,collections</tags>
+    </metadata>
+    <files>
+        <file src="dinqyjs.js" target="content\Scripts\dinqyjs.js" />
+        <file src="dinqyjs.min.js" target="content\Scripts\dinqyjs.min.js" />
+    </files>
+</package>
