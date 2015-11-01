@@ -1,11 +1,11 @@
-/*!Dinqyjs JavaScript Library v1.4.2
+/*!Dinqyjs JavaScript Library v1.5.0
 * http://dinqyjs.com/
 *
 * Copyright (c) 2015 Garry Passarella
 * Released under the MIT license
 * http://dinqyjs.com/license
 *
-* Date: October 31st 2015
+* Date: November 1st 2015
 */
 var Dinqyjs = (function() {
 	"use strict";
