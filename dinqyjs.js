@@ -934,10 +934,17 @@ var Dinqyjs = (function() {
 					return this._;
 				},
 
-				remove: function(element) {
-					var index = this._.indexOf(element);
-					if(index > -1) {
-						this.removeAt(index);
+				remove: function(elements) {
+					var index,
+						i;
+					if(!ARRAY[ISARRAY](elements)) {
+						elements = [elements];
+					}
+					for(i = 0; i < elements.length; i++) {
+						index = this._.indexOf(elements[i]);
+						if(index > -1) {
+							this.removeAt(index);
+						}
 					}
 				},
 

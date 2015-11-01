@@ -1254,6 +1254,15 @@ var Dinqyjs = Dinqyjs || require('dinqyjs');
 			new Collection(list).remove(o2);
 			expect(list).toEqual([o1,o3]);
 		});
+		
+		it("remove() -> removes multiple element", function(){
+			var o1 = {},
+				o2 = {},
+				o3 = {},
+				list = [ o1, o2, o3 ];
+			new Collection(list).remove([o1, o2]);
+			expect(list).toEqual([o3]);
+		});
 
 		it("remove() -> removes nothing if element is not found", function(){
 			var o1 = {},

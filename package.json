@@ -32,5 +32,6 @@
     "karma-phantomjs-launcher": "0.2.1",
     "gulp-rename": "1.2.2",
     "gulp-jshint":"1.12.0"
-  }
+  },
+  "license": [ { "type": "MIT", "url": "http://www.opensource.org/licenses/mit-license.php" } ]
 }
