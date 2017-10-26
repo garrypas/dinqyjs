@@ -92,9 +92,10 @@ The any() function indicates whether any element of a collection matches the giv
 
 Sorts the collection in ascending order. Unless the array is a simple type such as a string or number a selector will also need to be supplied to indicate what to sort on. This function modifies the underlying array. Given an array of [3,1,2] the new order will be 1,2,3
 
-collection.ascending(function(element) {
-    return element.price;
-});
+    collection.ascending(function(element) {
+      return element.price;
+    });
+
 NEW: From version 1.3 this function accepts multiple selectors, given 'sort by' ... 'then by' capability.
 
 **associative(array)**
@@ -126,7 +127,8 @@ Returns the average of the elements in the collection. Unless the array is an ar
 Clears the array, removing all elements
 
     collection.clear();
-    clearWhere([predicate])
+
+**clearWhere([predicate])**
 
 Removes elements from the array where the predicate returns true. The example below removes all elements where the price is greater than 100.
 
@@ -262,7 +264,7 @@ Finds the last element in the collection (looping backwards) that matches the pr
       return element === 2;
     }, 1, 3);
 
-The example above would find 2 in `[1, 2, 3, 4, 5]` but not 1 or 5 as it would never check them.
+The example above would find 2 in `[1, 2, 3, 4, 5]` but not `1` or `5` as it would never check them.
 
 **first([predicate])**
 
